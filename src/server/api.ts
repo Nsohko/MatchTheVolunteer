@@ -1,4 +1,6 @@
 import { HtmlBuilder } from './utility';
+import type { Case } from './types/case';
+import { getCaseLabel } from './types/case';
 import { VolunteerRepository, CaseRepository } from './repositories';
 import { VolunteerMatchingService, DistanceService } from './services';
 
@@ -19,7 +21,7 @@ class VolunteerLookupService {
         return { success: false, data: null };
       }
 
-      const html = HtmlBuilder.buildTableFromRow(volunteer.headers, volunteer.row, 15);
+      const html = HtmlBuilder.buildTableFromRowObject(volunteer);
       return { success: true, data: html };
     } catch (error) {
       throw new Error(`Error searching volunteer: ${(error as Error).toString()}`);
@@ -29,7 +31,7 @@ class VolunteerLookupService {
   static getCasesList(): { id: string; label: string }[] {
     try {
       const repository = new CaseRepository();
-      return repository.getAllCases();
+      return repository.getAllCases().map((c: Case) => ({ id: c.id, label: getCaseLabel(c) }));
     } catch (error) {
       throw new Error(`Error getting cases: ${(error as Error).toString()}`);
     }
@@ -77,8 +79,13 @@ class VolunteerLookupService {
       const matchingService = new VolunteerMatchingService();
       const result = matchingService.findClosestVolunteers(caseObj, volunteers, k);
 
-      const caseBiodata = caseObj.getBiodata();
-      const caseLocation = caseObj.getLocation();
+      const caseBiodata = {
+        gender: caseObj.gender || 'N/A',
+        dateOfFirstContact: caseObj.dateOfFirstContact || 'N/A',
+        language1: caseObj.language1 || 'N/A',
+        patientAddress: caseObj.patientAddress || 'N/A',
+      };
+      const caseLocation = caseObj.location;
 
       return {
         success: true,
@@ -87,7 +94,7 @@ class VolunteerLookupService {
         closestVolunteers: result.volunteers.map((v) => ({
           code: v.code,
           distanceKm: v.distanceKm.toFixed(2),
-          address: v.location,
+          address: v.location ?? 'N/A',
         })),
         closestCodes: result.volunteers.map((v) => v.code),
         debug: result.debug,

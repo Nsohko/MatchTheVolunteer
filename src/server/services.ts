@@ -158,7 +158,7 @@ export class VolunteerMatchingService {
       apiErrorDetails?: string;
     };
   } {
-    const caseLocation = caseObj.getLocation();
+    const caseLocation = caseObj.location;
     const candidates: { code: string; distanceKm: number; location: string }[] = [];
     const debug: {
       volunteersChecked: number;
@@ -177,7 +177,7 @@ export class VolunteerMatchingService {
     for (const volunteer of volunteers) {
       debug.volunteersChecked++;
 
-      const volLocation = volunteer.getLocation();
+      const volLocation = volunteer.location;
       if (!volLocation) continue;
 
       debug.volunteersWithLocation++;

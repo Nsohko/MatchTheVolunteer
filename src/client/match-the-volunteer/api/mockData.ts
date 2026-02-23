@@ -1,54 +1,125 @@
 /**
  * Mock data for local development when GAS is not available
+ * Uses generated data from mock_data/*.xlsx (run yarn generate-types to update)
  */
+import { volunteerData, caseData } from './mockData.generated';
 import type { VolunteerResult, CaseItem, CaseResult } from '../../../types';
 
-const MOCK_VOLUNTEER_HTML = `
-<table>
-  <tr><td>Code Number</td><td>R002</td></tr>
-  <tr><td>Name</td><td>Jane Doe</td></tr>
-  <tr><td>Email</td><td>jane@example.com</td></tr>
-  <tr><td>Phone</td><td>+65 9123 4567</td></tr>
-  <tr><td>Which area of Singapore do you live</td><td>Yishun</td></tr>
-</table>
-`.trim();
+function getCellByHeader(
+  headers: (string | number)[],
+  row: (string | number)[],
+  headerName: string
+): string {
+  const idx = findColumnIndex(headers, [headerName.trim()]);
+  if (idx === -1) return '';
+  const v = row[idx];
+  if (v === null || v === undefined) return '';
+  const s = String(v).trim();
+  if (!s || s === 'nan' || s === 'null') return '';
+  return s;
+}
 
-export const MOCK_CASES: CaseItem[] = [
-  { id: '1', label: 'Case 1: C001' },
-  { id: '2', label: 'Case 2: C002' },
-  { id: '3', label: 'Case 3: C003' },
-];
+function findColumnIndex(headers: (string | number)[], searchTerms: string[]): number {
+  for (let h = 0; h < headers.length; h++) {
+    const header = String(headers[h] || '');
+    const normalizedHeader = header.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+    if (searchTerms.some((term) => normalizedHeader.includes(term))) {
+      return h;
+    }
+  }
+  return -1;
+}
 
-const MOCK_VOLUNTEER_CODES = ['R001', 'R002', 'R003'];
+function buildTableFromRow(
+  headers: (string | number)[],
+  row: (string | number)[],
+  maxColumns = 15
+): string {
+  let html = '<table>';
+  for (let j = 0; j < Math.min(row.length, maxColumns); j++) {
+    if (row[j] !== null && row[j] !== '') {
+      const headerName = headers[j] ? String(headers[j]) : `Column ${j + 1}`;
+      const cellVal = String(row[j]);
+      html += `<tr><td>${headerName}</td><td>${cellVal}</td></tr>`;
+    }
+  }
+  html += '</table>';
+  return html;
+}
 
 export function mockSearchVolunteerByCode(code: string): VolunteerResult {
   const trimmed = code.trim().toUpperCase();
-  if (MOCK_VOLUNTEER_CODES.some((c) => c.toUpperCase() === trimmed)) {
-    return { success: true, data: MOCK_VOLUNTEER_HTML };
+  const codeColIdx = findColumnIndex(volunteerData.headers, ['Code Number']);
+  if (codeColIdx === -1) {
+    return { success: false, data: null };
   }
-  return { success: false, data: null };
+  const row = volunteerData.rows.find((r) => {
+    const cell = r[codeColIdx] != null ? String(r[codeColIdx]).trim().toUpperCase() : '';
+    return cell === trimmed;
+  });
+  if (!row) {
+    return { success: false, data: null };
+  }
+  const html = buildTableFromRow(volunteerData.headers, row);
+  return { success: true, data: html };
 }
 
 export function mockGetCasesList(): CaseItem[] {
-  return MOCK_CASES;
+  const snIdx = findColumnIndex(caseData.headers, ['SN']);
+  const codeIdx = findColumnIndex(caseData.headers, ['Code']);
+  const snCol = snIdx >= 0 ? snIdx : 0;
+  const codeCol = codeIdx >= 0 ? codeIdx : 1;
+
+  return caseData.rows.map((row, i) => {
+    const sn = row[snCol] != null ? String(row[snCol]) : String(i + 1);
+    const code = row[codeCol] != null ? String(row[codeCol]) : `C${String(i + 1).padStart(3, '0')}`;
+    return { id: String(i + 1), label: `Case ${sn}: ${code}` };
+  });
 }
 
-export function mockGetClosestVolunteersForCase(_caseId: string): CaseResult {
+export function mockGetClosestVolunteersForCase(caseId: string): CaseResult {
+  const idx = parseInt(caseId, 10) - 1;
+  const row = caseData.rows[idx];
+  if (!row) {
+    return {
+      success: true,
+      caseBiodata: {
+        gender: 'N/A',
+        dateOfFirstContact: 'N/A',
+        language1: 'N/A',
+        patientAddress: 'N/A',
+      },
+      closestVolunteers: [],
+      closestCodes: [],
+    };
+  }
+
+  const caseBiodata = {
+    gender: getCellByHeader(caseData.headers, row, 'Gender') || 'N/A',
+    dateOfFirstContact:
+      getCellByHeader(caseData.headers, row, 'Date of first contact') || 'N/A',
+    language1: getCellByHeader(caseData.headers, row, 'Language 1') || 'N/A',
+    patientAddress: getCellByHeader(caseData.headers, row, 'Patient Address') || 'N/A',
+  };
+
+  const codeColIdx = findColumnIndex(volunteerData.headers, ['Code Number']);
+  const areaColIdx = findColumnIndex(volunteerData.headers, [
+    'Which area of Singapore do you live',
+    '10. Which area',
+  ]);
+  const codeCol = codeColIdx >= 0 ? codeColIdx : 0;
+  const areaCol = areaColIdx >= 0 ? areaColIdx : 4;
+
+  const closest = volunteerData.rows.slice(0, 5).map((r, i) => ({
+    code: String(r[codeCol] ?? `R${String(i + 1).padStart(3, '0')}`),
+    distanceKm: `${(2 + i * 0.7).toFixed(2)}`,
+    address: `${String(r[areaCol] ?? 'N/A')}, Singapore`,
+  }));
+
   return {
     success: true,
-    caseBiodata: {
-      gender: 'Female',
-      dateOfFirstContact: '2024-01-15',
-      language1: 'English',
-      patientAddress: '123 Yishun Ave 6, Singapore',
-    },
-    closestVolunteers: [
-      { code: 'R001', distanceKm: '2.50', address: 'Yishun, Singapore' },
-      { code: 'R002', distanceKm: '3.20', address: 'Sembawang, Singapore' },
-      { code: 'R003', distanceKm: '4.10', address: 'Woodlands, Singapore' },
-      { code: 'R004', distanceKm: '5.30', address: 'Admiralty, Singapore' },
-      { code: 'R005', distanceKm: '6.00', address: 'Marsiling, Singapore' },
-    ],
-    closestCodes: ['R001', 'R002', 'R003', 'R004', 'R005'],
+    caseBiodata,
+    closestVolunteers: closest,
+    closestCodes: closest.map((v) => v.code),
   };
 }

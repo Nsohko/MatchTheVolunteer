@@ -8,6 +8,9 @@
     "url": "https://github.com/enuchi/React-Google-Apps-Script.git"
   },
   "scripts": {
+    "generate-types": "node scripts/generate-types-from-xlsx.js",
+    "generate-mock": "node scripts/generate-mock-from-xlsx.js",
+    "generate-all": "yarn generate-types && yarn generate-mock",
     "dev": "vite",
     "lint": "eslint .",
     "test:integration": "jest --forceExit test/local-development.test",
@@ -88,6 +91,7 @@
     "typescript": "^5.2.2",
     "vite": "^5.2.0",
     "vite-plugin-singlefile": "^2.0.1",
-    "vite-plugin-static-copy": "^1.0.1"
+    "vite-plugin-static-copy": "^1.0.1",
+    "xlsx": "^0.18.5"
   }
 }

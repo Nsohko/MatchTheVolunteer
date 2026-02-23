@@ -1,12 +1,3 @@
-/**
- * Shared types for frontend
- */
-
-export interface VolunteerResult {
-  success: boolean;
-  data: string | null;
-}
-
 export interface CaseItem {
   id: string;
   label: string;

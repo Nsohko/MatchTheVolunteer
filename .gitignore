@@ -16,3 +16,8 @@ dist/
 
 #secret
 .env
+
+# Mock data and Excel sources
+mock_data/
+*.xlsx
+src/client/match-the-volunteer/api/mockData.generated.ts

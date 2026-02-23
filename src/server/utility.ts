@@ -83,6 +83,37 @@ export class HtmlBuilder {
     return html;
   }
 
+  static buildTableFromRowObject(
+    row: Record<string, string | number | Record<string, boolean> | null | undefined>,
+    maxColumns = 25
+  ): string {
+    const entries = Object.entries(row).slice(0, maxColumns);
+    let html = '<table>';
+    for (const [headerName, value] of entries) {
+      if (value != null && value !== '') {
+        let displayValue: string;
+        if (
+          headerName === 'availabilities' &&
+          typeof value === 'object' &&
+          value !== null &&
+          !Array.isArray(value)
+        ) {
+          const days = Object.entries(value as Record<string, boolean>)
+            .filter(([, v]) => v)
+            .map(([d]) => d);
+          displayValue = days.length > 0 ? days.join(', ') : 'None';
+        } else {
+          displayValue = String(value).trim();
+        }
+        if (displayValue && displayValue !== 'nan' && displayValue !== 'null') {
+          html += `<tr><td>${headerName}</td><td>${displayValue}</td></tr>`;
+        }
+      }
+    }
+    html += '</table>';
+    return html;
+  }
+
   static buildVolunteersTable(
     volunteers: { code: string; distanceKm: string; address?: string }[]
   ): string {
