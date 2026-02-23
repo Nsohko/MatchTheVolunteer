@@ -1,9 +1,7 @@
-import {
-  searchVolunteerByCode,
-  getCasesList,
-  getClosestVolunteersForCase,
-  testGoogleMapsAPI,
-} from './api';
+
+import { getCasesList } from "./handlers/case";
+import { getClosestVolunteersForCase, searchVolunteerByCode } from "./handlers/volunteer";
+
 
 /**
  * Web app entry point - serves the React UI
@@ -17,5 +15,4 @@ export {
   searchVolunteerByCode,
   getCasesList,
   getClosestVolunteersForCase,
-  testGoogleMapsAPI,
 };

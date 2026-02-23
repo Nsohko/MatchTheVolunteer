@@ -1,10 +1,10 @@
 import { CONFIG } from "../config";
-import type { Volunteer } from "../types/volunteer";
-import { DAY_HEADER_MAP, DAYS } from "../types/volunteer";
-import { VOLUNTEER_HEADER_MAP } from "../types/volunteer";
-import { SheetHelper } from "../utility";
-import type { VolunteerRow } from "../types/sheets";
+import type { Volunteer } from "../../types/volunteer";
+import { DAY_HEADER_MAP, DAYS } from "../../types/volunteer";
+import { VOLUNTEER_HEADER_MAP } from "../../types/volunteer";
+import type { VolunteerRow } from "../../types/sheets";
 import { getValueByHeaderMatch, rowToObject } from "./utils";
+import { openSpreadsheet, getSheet, getAllData, findHeaderRowIndex } from "../utils/sheets";
 
 function buildAvailabilities(row: VolunteerRow): Record<string, boolean> {
   const availabilities: Record<string, boolean> = {};
@@ -84,10 +84,10 @@ export class VolunteerRepository {
   data: VolunteerRow[];
 
   constructor() {
-    this.spreadsheet = SheetHelper.openSpreadsheet(CONFIG.SHEET_URL);
-    this.sheet = SheetHelper.getSheet(this.spreadsheet, CONFIG.VOLUNTEER_SHEET_NAME);
-    const rawData = SheetHelper.getAllData(this.sheet) as (string | number)[][];
-    const headerRowIdx = SheetHelper.findHeaderRowIndex(rawData, ["Code Number"]);
+    this.spreadsheet = openSpreadsheet(CONFIG.SHEET_URL);
+    this.sheet = getSheet(this.spreadsheet, CONFIG.VOLUNTEER_SHEET_NAME);
+    const rawData = getAllData(this.sheet) as (string | number)[][];
+    const headerRowIdx = findHeaderRowIndex(rawData, ["Code Number"]);
     const headers = (rawData[headerRowIdx] ?? []).map((h) => String(h ?? ""));
 
     this.data = rawData

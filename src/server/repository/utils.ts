@@ -3,7 +3,7 @@
  * Used by CaseRepository and VolunteerRepository.
  */
 
-import type { Row } from '../types/sheets';
+import type { Row } from '../../types/sheets';
 
 export function getValueByHeaderMatch(
   row: Row,

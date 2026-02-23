@@ -1,8 +1,8 @@
 import { CONFIG } from "../config";
-import type { Case } from "../types/case";
-import { CASE_HEADER_MAP } from "../types/case";
-import { SheetHelper } from "../utility";
-import type { CaseRow } from "../types/sheets";
+import type { Case } from "../../types/case";
+import { CASE_HEADER_MAP } from "../../types/case";
+import type { CaseRow } from "../../types/sheets";
+import { findHeaderRowIndex, getAllData, getSheet, openSpreadsheet } from "../utils/sheets";
 import { getValueByHeaderMatch, rowToObject } from "./utils";
 
 function caseRowToCase(rowIndex: number, row: CaseRow): Case {
@@ -96,10 +96,10 @@ export class CaseRepository {
   data: CaseRow[];
 
   constructor() {
-    this.spreadsheet = SheetHelper.openSpreadsheet(CONFIG.CASE_SHEET_URL);
-    this.sheet = SheetHelper.getSheet(this.spreadsheet, CONFIG.CASE_SHEET_NAME);
-    const rawData = SheetHelper.getAllData(this.sheet) as (string | number)[][];
-    const headerRowIdx = SheetHelper.findHeaderRowIndex(rawData, ["SN"]);
+    this.spreadsheet = openSpreadsheet(CONFIG.CASE_SHEET_URL);
+    this.sheet = getSheet(this.spreadsheet, CONFIG.CASE_SHEET_NAME);
+    const rawData = getAllData(this.sheet) as (string | number)[][];
+    const headerRowIdx = findHeaderRowIndex(rawData, ["SN"]);
     const headers = (rawData[headerRowIdx] ?? []).map((h) => String(h ?? ""));
 
     this.data = rawData
