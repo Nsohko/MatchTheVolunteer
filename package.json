@@ -8,6 +8,7 @@
     "url": "https://github.com/enuchi/React-Google-Apps-Script.git"
   },
   "scripts": {
+    "postinstall": "patch-package",
     "generate-types": "node scripts/generate-types-from-xlsx.js",
     "generate-mock": "node scripts/generate-mock-from-xlsx.js",
     "generate-all": "yarn generate-types && yarn generate-mock",
@@ -80,8 +81,10 @@
     "jest": "^28.1.1",
     "jest-environment-node": "^28.1.1",
     "jest-image-snapshot": "^5.1.0",
+    "patch-package": "^8.0.1",
     "postcss": "^8.4.38",
     "postcss-preset-env": "^9.5.4",
+    "postinstall-postinstall": "^2.1.0",
     "prettier": "^2.7.0",
     "puppeteer": "^14.3.0",
     "puppeteer-extra": "^3.2.3",

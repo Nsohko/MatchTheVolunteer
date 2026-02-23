@@ -4,7 +4,7 @@
 
 export const CONFIG = {
   SHEET_URL:
-    'https://docs.google.com/spreadsheets/d/1NJLJw3T2YtqkOCOXm5KFPqTUJZXaB2LgRIddOxDPBro/edit?gid=397834522#gid=397834522',
+    'https://docs.google.com/spreadsheets/d/18ZWFv487ODRBjjzBzWr09r2Dc5gMzmvnJvQ6ssI6FXk/edit?gid=1230460916#gid=1230460916',
   CASE_SHEET_URL:
     'https://docs.google.com/spreadsheets/d/1cObm1Qq-jS9RwW15Zc7G7DUrXg091EQAoJsppUNTg3U/edit?gid=0#gid=0',
   VOLUNTEER_SHEET_NAME: 'Volunteer Masterlist',

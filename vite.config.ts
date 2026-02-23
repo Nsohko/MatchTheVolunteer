@@ -77,13 +77,16 @@ const clientBuildConfig = ({
     },
   });
 
+/** IIFE arg that creates exports on the real global - avoids `this` being undefined in GAS */
+const GAS_EXPORTS_ARG = `(function(){var g=typeof globalThis!=="undefined"?globalThis:typeof self!=="undefined"?self:this;g.__gasExports=g.__gasExports||{};return g.__gasExports;}())`;
+
 const serverBuildConfig: BuildOptions = {
   emptyOutDir: true,
   minify: false, // needed to work with footer
   lib: {
     entry: resolve(__dirname, serverEntry),
     fileName: 'code',
-    name: 'globalThis',
+    name: '__gasExports',
     formats: ['iife'],
   },
   rollupOptions: {
@@ -91,9 +94,32 @@ const serverBuildConfig: BuildOptions = {
       entryFileNames: 'code.js',
       extend: true,
       footer: (chunk) => {
-        return `(function(g){var m=g.globalThis||g;${chunk.exports.map((fn) => `if(m.${fn})g.${fn}=m.${fn};`).join('')}})(typeof globalThis!=='undefined'?globalThis:typeof self!=='undefined'?self:this);`;
+        return `(function(g){var m=g.__gasExports||g;${chunk.exports.map((fn) => `if(m.${fn})g.${fn}=m.${fn};`).join('')}})(typeof globalThis!=="undefined"?globalThis:typeof self!=="undefined"?self:this);`;
       },
     },
+    plugins: [
+      {
+        name: 'gas-iife-exports',
+        generateBundle(_, bundle) {
+          for (const file of Object.values(bundle)) {
+            if (file.type === 'chunk' && file.fileName === 'code.js' && file.code) {
+              // 1. Prepend top-level function stubs so GAS discovers them at parse time
+              const stubs = (file as { exports?: string[] }).exports
+                ?.map((fn) => `function ${fn}(){}`)
+                .join('');
+              if (stubs) {
+                file.code = stubs + file.code;
+              }
+              // 2. Replace IIFE arg with safe global lookup
+              file.code = file.code.replace(
+                /\}\)\(this\.\w+\s*=\s*this\.\w+\s*\|\|\s*\{\}\);/,
+                `})(${GAS_EXPORTS_ARG});`
+              );
+            }
+          }
+        },
+      },
+    ],
   },
 };
 
