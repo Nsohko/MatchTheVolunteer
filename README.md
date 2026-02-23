@@ -68,3 +68,8 @@ The types in [sheets.ts](src\types\sheets.ts) are generated dynamically from the
 To refresh the types (e.g. if column names change) run ```yarn generate-types```
 You may also need to change the variable-column mapping in [case.ts](src\types\case.ts) and [volunteer.ts](src\types\volunteer.ts)
 
+
+### References
+
+This project was built on [React-Google-Apps-Script](https://github.com/enuchi/React-Google-Apps-Script) by [Enuchi](https://github.com/enuchi)
+
