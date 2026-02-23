@@ -13,13 +13,16 @@ Volunteer and Case lookup app built with React and Google Apps Script. Reads fro
 1. **Install dependencies**
    ```bash
    yarn install
-   ```
+   ```  
+   <br/>
 
 2. **Login to Clasp**
    ```bash
    yarn login
    ```
    Opens a browser to authorize clasp with your Google account.
+   (Yes the command is yarn, its configured to open clasp)
+   </br>
 
 3. **Create GAS project** (first-time only)
    ```bash
@@ -28,75 +31,40 @@ Volunteer and Case lookup app built with React and Google Apps Script. Reads fro
    Creates a new Apps Script project and configures `.clasp.json` with `rootDir: "./dist"`.
    If you already have a project, ensure `.clasp.json` exists with your `scriptId` and `"rootDir": "./dist"`.
 
-4. **Configure sheets metadata**
+## Local Development & Testing
+Note: Map API cannot be tested locally yet (no time to finish)
+TODO: Make it able to connect to sheets and map during local dev
 
-   **GAS (deployed):** Set Script Properties in the GAS editor:
-   - Push once, then open the project at [script.google.com](https://script.google.com)
-   - **Project Settings** (gear) → **Script properties** → Add:
+1. **Create a .env file, and copy the content of [.env.example](.env.example)**
+
+2. **Download the Cases and Volunteer Masterlist, and place them under /mock_data**
+
+3. **Run ```yarn generate-mock``` to generate mock data for testing from the sheets.**
+   If the data changes, run the command again to generate fresh mock data
+
+4. **Run ```yarn dev```, web app should be available at http://localhost:3000/**
+
+
+## Pushing to GAS
+1. **Run ```yarn deploy```.**
+   This will push ur code to GAS
+
+2. **Configure sheets metadata fFrom your project page on GAS**
+   **Project Settings** (gear) → **Script properties** → Add:
      - `SHEET_URL` – Volunteer spreadsheet URL
      - `CASE_SHEET_URL` – Case spreadsheet URL
      - `VOLUNTEER_SHEET_NAME` – e.g. `Volunteer Masterlist`
      - `CASE_SHEET_NAME` – e.g. `Cases`
      - `GOOGLE_MAPS_API_KEY` – Your Google Maps API key
 
-   **Local dev:** Copy `.env.example` to `.env` and fill in the same values:
-   ```bash
-   cp .env.example .env
-   ```
-   Scripts (`generate-types`, `generate-mock`) read from `.env`.
+3. **Deploy**
+   From the GAS editor: **Deploy** → **New deployment** → **Web app**
+   - Execute as: **Me**
+   - Who has access: **Anyone** (or your preference)
 
-5. **Generate types and mock data** (for local dev)
-   - Add XLSX files to `mock_data/`:
-     - `1. Volunteer Masterlist.xlsx`
-     - `Case Masterlist.xlsx`
-   - Run:
-     ```bash
-     yarn generate-all
-     ```
-   - This generates `src/server/types/sheets.ts` and `src/client/api/mockData.generated.ts`
+## Other Notes
 
-6. **HTTPS for local dev** (optional)
-  ```bash
-   yarn setup:https
-  ```
-   Creates `certs/` for HTTPS (required for GAS iframe in local dev).
-
-## Main Commands
-
-
-| Command           | Description                                           |
-| ----------------- | ----------------------------------------------------- |
-| `yarn dev`        | Start Vite dev server (port 3000)                     |
-| `yarn build`      | Production build → `dist/`                            |
-| `yarn build:dev`  | Development build (dev-server wrapper)                |
-| `yarn push`       | Push `dist/` to Google Apps Script                    |
-| `yarn deploy`     | Build + push (production)                             |
-| `yarn deploy:dev` | Build + push (development)                            |
-| `yarn start`      | Deploy dev + start local server (full local dev flow) |
-| `yarn open`       | Open GAS project in browser                           |
-| `yarn lint`       | Run ESLint                                            |
-
-
-## Type & Mock Data Generation
-
-
-| Command               | Description                                | Output                                 |
-| --------------------- | ------------------------------------------ | -------------------------------------- |
-| `yarn generate-types` | Generate TypeScript types from XLSX        | `src/server/types/sheets.ts`           |
-| `yarn generate-mock`  | Generate mock data from XLSX for local dev | `src/client/api/mockData.generated.ts` |
-| `yarn generate-all`   | Run both                                   | Both files above                       |
-
-
-**Requirements:** Place `1. Volunteer Masterlist.xlsx` and `Case Masterlist.xlsx` in `mock_data/` before running. Scripts read `.env` for optional overrides (`VOLUNTEER_XLSX_PATH`, `CASE_XLSX_PATH`).
-
-## Deploy to Production
-
-```bash
-yarn deploy
-```
-
-Then in the GAS editor: **Deploy** → **New deployment** → **Web app**
-
-- Execute as: **Me**
-- Who has access: **Anyone** (or your preference)
+The types in [sheets.ts](src\types\sheets.ts) are generated dynamically from the sheet columns
+To refresh the types (e.g. if column names change) run ```yarn generate-types```
+You may also need to change the variable-column mapping in [case.ts](src\types\case.ts) and [volunteer.ts](src\types\volunteer.ts)
 
