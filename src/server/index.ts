@@ -14,5 +14,5 @@ export {
   doGet,
   searchVolunteerByCode,
   getCasesList,
-  getClosestVolunteersForCase,
+  getClosestVolunteersForCase
 };

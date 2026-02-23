@@ -18,7 +18,7 @@ const clientEntrypoints = [
   {
     name: 'CLIENT - Match The Volunteer',
     filename: 'match-the-volunteer',
-    template: 'match-the-volunteer/index.html',
+    template: 'index.html',
   },
 ];
 
@@ -52,7 +52,7 @@ const clientServeConfig = () =>
   defineConfig({
     plugins: [react()],
     server: devServerOptions,
-    root: resolve(__dirname, clientRoot, 'match-the-volunteer'),
+    root: resolve(__dirname, clientRoot),
   });
 
 const clientBuildConfig = ({
@@ -126,7 +126,7 @@ const buildConfig = ({ mode }: { mode: string }) => {
             console.log('Building client bundle for', clientEntrypoint.name);
             const buildOutput = await build(
               clientBuildConfig({
-                clientEntrypointRoot: clientEntrypoint.filename,
+                clientEntrypointRoot: '.',
                 template: clientEntrypoint.template,
               })
             );

@@ -1,6 +1,6 @@
 import { CaseRepository } from "../repository/CaseRepository";
 import { VolunteerRepository } from "../repository/VolunteerRepository";
-import { Volunteer } from "../../types/volunteer";
+import { ClosestVolunteersResponse, Volunteer } from "../../types/volunteer";
 import { findClosestVolunteers } from "../matching/location";
 
 export function searchVolunteerByCode(code: string): Volunteer {
@@ -13,9 +13,9 @@ export function searchVolunteerByCode(code: string): Volunteer {
 }
 
 export function getClosestVolunteersForCase(
-    caseRowId: string,
-    k = 5
-  ): Volunteer[] {
+  caseRowId: string,
+  k = 5
+): ClosestVolunteersResponse {
     try {
       const rowIndex = parseInt(caseRowId, 10);
       if (Number.isNaN(rowIndex) || rowIndex < 1) {

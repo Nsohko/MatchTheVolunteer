@@ -13,7 +13,7 @@ export const paths = {
   volunteer: join(rootDir, 'mock_data', '1. Volunteer Masterlist.xlsx'),
   case: join(rootDir, 'mock_data', 'Case Masterlist.xlsx'),
   sheetsTs: join(rootDir, 'src', 'server', 'types', 'sheets.ts'),
-  mockGenerated: join(rootDir, 'src', 'client', 'match-the-volunteer', 'api', 'mockData.generated.ts'),
+  mockGenerated: join(rootDir, 'src', 'client', 'api', 'mockData.generated.ts'),
 };
 
 export function findHeaderRowIndex(data, identifierColumns = ['Code Number', 'SN']) {

@@ -110,3 +110,10 @@ export const VOLUNTEER_HEADER_MAP: Record<keyof Omit<Volunteer, 'availabilities'
   mailingList: ['MAILING LIST', '通讯录'],
   howDidYouFindUs: ['How did you find out about us', '你是怎么认识我们'],
 };
+
+export interface VolunteerWithDistance {
+  volunteer: Volunteer;
+  distanceKm: number;
+}
+
+export type ClosestVolunteersResponse = VolunteerWithDistance[];

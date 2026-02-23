@@ -2,13 +2,15 @@
  * API layer - uses gas-client when in GAS, mock data for local dev when GAS unavailable
  */
 import { GASClient } from 'gas-client';
-import type * as ServerTypes from '../../../server';
+import type * as ServerTypes from '../../server';
 import {
   mockSearchVolunteerByCode,
   mockGetCasesList,
   mockGetClosestVolunteersForCase,
 } from './mockData';
-import type { VolunteerResult, CaseItem, CaseResult } from '../../../types';
+import { ClosestVolunteersResponse, Volunteer } from '../../types/volunteer';
+import { Case } from '../../types/case';
+
 
 const { serverFunctions } = new GASClient<typeof ServerTypes>({
   allowedDevelopmentDomains: (origin) =>
@@ -22,7 +24,7 @@ function isGasAvailable(): boolean {
   return typeof (window as { google?: { script?: { run?: unknown } } }).google?.script?.run !== 'undefined';
 }
 
-export async function searchVolunteerByCode(code: string): Promise<VolunteerResult> {
+export async function searchVolunteerByCode(code: string): Promise<Volunteer> {
   if (isGasAvailable()) {
     return serverFunctions.searchVolunteerByCode(code);
   }
@@ -31,7 +33,7 @@ export async function searchVolunteerByCode(code: string): Promise<VolunteerResu
   });
 }
 
-export async function getCasesList(): Promise<CaseItem[]> {
+export async function getCasesList(): Promise<Case[]> {
   if (isGasAvailable()) {
     return serverFunctions.getCasesList();
   }
@@ -40,7 +42,7 @@ export async function getCasesList(): Promise<CaseItem[]> {
   });
 }
 
-export async function getClosestVolunteersForCase(caseId: string): Promise<CaseResult> {
+export async function getClosestVolunteersForCase(caseId: string): Promise<ClosestVolunteersResponse> {
   if (isGasAvailable()) {
     return serverFunctions.getClosestVolunteersForCase(caseId);
   }
