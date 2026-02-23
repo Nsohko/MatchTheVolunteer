@@ -8,65 +8,80 @@ Volunteer and Case lookup app built with React and Google Apps Script. Reads fro
 - Yarn (classic)
 - [Google Apps Script API](https://script.google.com/home/usersettings) enabled
 
-## Setup
+## Initial Setup
 
 1. **Install dependencies**
-   ```bash
+  ```bash
    yarn install
-   ```
-
+  ```
 2. **Login to Clasp**
-   ```bash
-   yarn run login
-   ```
+  ```bash
+   yarn login
+  ```
+   Opens a browser to authorize clasp with your Google account.
+3. **Create GAS project** (first-time only)
+  ```bash
+   yarn setup
+  ```
+   Creates a new Apps Script project and configures `.clasp.json` with `rootDir: "./dist"`.
+   If you already have a project, ensure `.clasp.json` exists with your `scriptId` and `"rootDir": "./dist"`.
+4. **Set spreadsheet URLs** (required before first push)
+  Edit `src/server/config.ts` with your Volunteer and Case spreadsheet URLs.
 
-3. **Create GAS project** (standalone web app)
-   ```bash
-   yarn run setup
-   ```
-   Or manually: `npx clasp create --type standalone --title "MatchTheVolunteer"` and update `.clasp.json` with the scriptId and `"rootDir": "./dist"`.
+6. **Configure Google Maps API key**
+  - Push once, then open the project at [script.google.com](https://script.google.com)
+  - **Project Settings** (gear) → **Script properties** → Add `GOOGLE_MAPS_API_KEY`
+7. **Generate types and mock data** (for local dev)
+  - Add XLSX files to `mock_data/`:
+    - `1. Volunteer Masterlist.xlsx`
+    - `Case Masterlist.xlsx`
+  - Run:
+    ```bash
+    yarn generate-all
+    ```
+  - This generates `src/server/types/sheets.ts` and `src/client/api/mockData.generated.ts`
+8. **HTTPS for local dev** (optional)
+  ```bash
+   yarn setup:https
+  ```
+   Creates `certs/` for HTTPS (required for GAS iframe in local dev).
 
-4. **Set GOOGLE_MAPS_API_KEY** in GAS Script Properties:
-   - Deploy once, then open the project in [script.google.com](https://script.google.com)
-   - File > Project properties > Script properties
-   - Add `GOOGLE_MAPS_API_KEY` with your Google Maps API key
+## Main Commands
 
-## Deploy
+
+| Command           | Description                                           |
+| ----------------- | ----------------------------------------------------- |
+| `yarn dev`        | Start Vite dev server (port 3000)                     |
+| `yarn build`      | Production build → `dist/`                            |
+| `yarn build:dev`  | Development build (dev-server wrapper)                |
+| `yarn push`       | Push `dist/` to Google Apps Script                    |
+| `yarn deploy`     | Build + push (production)                             |
+| `yarn deploy:dev` | Build + push (development)                            |
+| `yarn start`      | Deploy dev + start local server (full local dev flow) |
+| `yarn open`       | Open GAS project in browser                           |
+| `yarn lint`       | Run ESLint                                            |
+
+
+## Type & Mock Data Generation
+
+
+| Command               | Description                                | Output                                 |
+| --------------------- | ------------------------------------------ | -------------------------------------- |
+| `yarn generate-types` | Generate TypeScript types from XLSX        | `src/server/types/sheets.ts`           |
+| `yarn generate-mock`  | Generate mock data from XLSX for local dev | `src/client/api/mockData.generated.ts` |
+| `yarn generate-all`   | Run both                                   | Both files above                       |
+
+
+**Requirements:** Place `1. Volunteer Masterlist.xlsx` and `Case Masterlist.xlsx` in `mock_data/` before running.
+
+## Deploy to Production
 
 ```bash
-yarn run deploy
+yarn deploy
 ```
 
-Then in the GAS editor: **Deploy > New deployment > Web app**
+Then in the GAS editor: **Deploy** → **New deployment** → **Web app**
+
 - Execute as: **Me**
 - Who has access: **Anyone** (or your preference)
 
-## Spreadsheet URLs
-
-Edit `src/server/config.ts` to change the Volunteer and Case spreadsheet URLs:
-
-```ts
-export const CONFIG = {
-  SHEET_URL: "https://docs.google.com/spreadsheets/d/YOUR_VOLUNTEER_ID/edit...",
-  CASE_SHEET_URL: "https://docs.google.com/spreadsheets/d/YOUR_CASE_ID/edit...",
-  VOLUNTEER_SHEET_NAME: "Volunteer Masterlist",
-  CASE_SHEET_NAME: "Cases",
-  ...
-};
-```
-
-## Local Development
-
-```bash
-yarn run setup:https   # First time only - generates certs
-yarn run start         # Deploys dev build and starts local server
-```
-
-Then open the web app URL and it will load your local React app with live reload.
-
-## Scripts
-
-- `yarn build` - Production build (outputs to `dist/`)
-- `yarn deploy` - Build and push to GAS
-- `yarn dev` - Start Vite dev server (for local UI development)
-- `yarn push` - Push `dist/` to GAS (run after build)
