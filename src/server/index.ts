@@ -1,24 +1,21 @@
 import {
-  onOpen,
-  openDialog,
-  openDialogBootstrap,
-  openDialogMUI,
-  openDialogTailwindCSS,
-  openAboutSidebar,
-} from './ui';
+  searchVolunteerByCode,
+  getCasesList,
+  getClosestVolunteersForCase,
+  testGoogleMapsAPI,
+} from './api';
 
-import { getSheetsData, addSheet, deleteSheet, setActiveSheet } from './sheets';
+/**
+ * Web app entry point - serves the React UI
+ */
+function doGet() {
+  return HtmlService.createHtmlOutputFromFile('match-the-volunteer');
+}
 
-// Public functions must be exported as named exports
 export {
-  onOpen,
-  openDialog,
-  openDialogBootstrap,
-  openDialogMUI,
-  openDialogTailwindCSS,
-  openAboutSidebar,
-  getSheetsData,
-  addSheet,
-  deleteSheet,
-  setActiveSheet,
+  doGet,
+  searchVolunteerByCode,
+  getCasesList,
+  getClosestVolunteersForCase,
+  testGoogleMapsAPI,
 };

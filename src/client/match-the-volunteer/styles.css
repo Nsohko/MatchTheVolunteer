@@ -1,0 +1,163 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background-color: #f5f5f5;
+  margin: 0;
+}
+
+.container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+h2 {
+  color: #333;
+  margin-top: 0;
+}
+
+h3 {
+  color: #555;
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ddd;
+}
+
+.tab-button {
+  padding: 12px 20px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  border-bottom: 3px solid transparent;
+  color: #666;
+  transition: all 0.3s;
+}
+
+.tab-button:hover {
+  color: #4caf50;
+}
+
+.tab-button.active {
+  color: #4caf50;
+  border-bottom-color: #4caf50;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  color: #666;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+input[type='text'],
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+button {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+.result {
+  margin-top: 20px;
+  padding: 15px;
+  border-left: 4px solid #4caf50;
+  background-color: #f0f8f0;
+  border-radius: 4px;
+}
+
+.result.error {
+  border-left-color: #f44336;
+  background-color: #ffebee;
+}
+
+.result h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.result-content {
+  color: #666;
+  line-height: 1.6;
+}
+
+.result-content table {
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+td:first-child {
+  font-weight: bold;
+  width: 30%;
+  background-color: #f9f9f9;
+}
+
+th {
+  padding: 10px 8px;
+  text-align: left;
+  background-color: #4caf50;
+  color: white;
+  font-weight: bold;
+  border-bottom: 2px solid #45a049;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.loading {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+}

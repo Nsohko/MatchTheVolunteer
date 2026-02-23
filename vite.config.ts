@@ -16,29 +16,9 @@ const devServerWrapper = './dev/dev-server-wrapper.html';
 
 const clientEntrypoints = [
   {
-    name: 'CLIENT - Dialog Demo',
-    filename: 'dialog-demo', // we'll add the .html suffix to these
-    template: 'dialog-demo/index.html',
-  },
-  {
-    name: 'CLIENT - Dialog Demo Bootstrap',
-    filename: 'dialog-demo-bootstrap',
-    template: 'dialog-demo-bootstrap/index.html',
-  },
-  {
-    name: 'CLIENT - Dialog Demo MUI',
-    filename: 'dialog-demo-mui',
-    template: 'dialog-demo-mui/index.html',
-  },
-  {
-    name: 'CLIENT - Dialog Demo Tailwind CSS',
-    filename: 'dialog-demo-tailwindcss',
-    template: 'dialog-demo-tailwindcss/index.html',
-  },
-  {
-    name: 'CLIENT - Sidebar About Page',
-    filename: 'sidebar-about-page',
-    template: 'sidebar-about-page/index.html',
+    name: 'CLIENT - Match The Volunteer',
+    filename: 'match-the-volunteer',
+    template: 'match-the-volunteer/index.html',
   },
 ];
 
@@ -72,7 +52,7 @@ const clientServeConfig = () =>
   defineConfig({
     plugins: [react()],
     server: devServerOptions,
-    root: clientRoot,
+    root: resolve(__dirname, clientRoot, 'match-the-volunteer'),
   });
 
 const clientBuildConfig = ({
@@ -92,32 +72,6 @@ const clientBuildConfig = ({
       emptyOutDir: true,
       minify: true,
       rollupOptions: {
-        external: [
-          'react',
-          'react-dom',
-          'react-transition-group',
-          'react-bootstrap',
-          '@mui/material',
-          '@emotion/react',
-          '@emotion/styled',
-          'gas-client',
-          '@types/react',
-        ],
-        output: {
-          format: 'iife', // needed to use globals from UMD builds
-          dir: outDir,
-          globals: {
-            react: 'React',
-            'react-dom': 'ReactDOM',
-            'react-transition-group': 'ReactTransitionGroup',
-            'react-bootstrap': 'ReactBootstrap',
-            '@mui/material': 'MaterialUI',
-            '@emotion/react': 'emotionReact',
-            '@emotion/styled': 'emotionStyled',
-            'gas-client': 'GASClient',
-            '@types/react': '@types/react',
-          },
-        },
         input: resolve(__dirname, clientRoot, template),
       },
     },
@@ -136,10 +90,9 @@ const serverBuildConfig: BuildOptions = {
     output: {
       entryFileNames: 'code.js',
       extend: true,
-      footer: (chunk) =>
-        chunk.exports
-          .map((exportedFunction) => `function ${exportedFunction}() {};`)
-          .join('\n'),
+      footer: (chunk) => {
+        return `(function(g){var m=g.globalThis||g;${chunk.exports.map((fn) => `if(m.${fn})g.${fn}=m.${fn};`).join('')}})(typeof globalThis!=='undefined'?globalThis:typeof self!=='undefined'?self:this);`;
+      },
     },
   },
 };
@@ -165,32 +118,21 @@ const buildConfig = ({ mode }: { mode: string }) => {
       viteStaticCopy({
         targets,
       }),
-      /**
-       * This builds the client react app bundles for production, and writes them to disk.
-       * Because multiple client entrypoints (dialogs) are built, we need to loop through
-       * each entrypoint and build the client bundle for each. Vite doesn't have great tooling for
-       * building multiple single-page apps in one project, so we have to do this manually with a
-       * post-build closeBundle hook (https://rollupjs.org/guide/en/#closebundle).
-       */
       mode === 'production' && {
         name: 'build-client-production-bundles',
         closeBundle: async () => {
           console.log('Building client production bundles...');
-          // eslint-disable-next-line no-restricted-syntax
           for (const clientEntrypoint of clientEntrypoints) {
             console.log('Building client bundle for', clientEntrypoint.name);
-            // eslint-disable-next-line no-await-in-loop
             const buildOutput = await build(
               clientBuildConfig({
                 clientEntrypointRoot: clientEntrypoint.filename,
                 template: clientEntrypoint.template,
               })
             );
-            // eslint-disable-next-line no-await-in-loop
             await writeFile(
               resolve(__dirname, outDir, `${clientEntrypoint.filename}.html`),
-              // @ts-expect-error - output is an array of RollupOutput
-              buildOutput.output[0].source
+              (buildOutput as { output: { source: string }[] }).output[0].source
             );
           }
           console.log('Finished building client bundles!');
@@ -204,11 +146,9 @@ const buildConfig = ({ mode }: { mode: string }) => {
 // https://vitejs.dev/config/
 export default async ({ command, mode }: { command: string; mode: string }) => {
   if (command === 'serve') {
-    // for 'serve' mode, we only want to serve the client bundle locally
     return clientServeConfig();
   }
   if (command === 'build') {
-    // for 'build' mode, we have two paths: build assets for local development, and build for production
     return buildConfig({ mode });
   }
   return {};
