@@ -11,36 +11,51 @@ Volunteer and Case lookup app built with React and Google Apps Script. Reads fro
 ## Initial Setup
 
 1. **Install dependencies**
-  ```bash
+   ```bash
    yarn install
-  ```
+   ```
+
 2. **Login to Clasp**
-  ```bash
+   ```bash
    yarn login
-  ```
+   ```
    Opens a browser to authorize clasp with your Google account.
+
 3. **Create GAS project** (first-time only)
-  ```bash
+   ```bash
    yarn setup
-  ```
+   ```
    Creates a new Apps Script project and configures `.clasp.json` with `rootDir: "./dist"`.
    If you already have a project, ensure `.clasp.json` exists with your `scriptId` and `"rootDir": "./dist"`.
-4. **Set spreadsheet URLs** (required before first push)
-  Edit `src/server/config.ts` with your Volunteer and Case spreadsheet URLs.
 
-6. **Configure Google Maps API key**
-  - Push once, then open the project at [script.google.com](https://script.google.com)
-  - **Project Settings** (gear) → **Script properties** → Add `GOOGLE_MAPS_API_KEY`
-7. **Generate types and mock data** (for local dev)
-  - Add XLSX files to `mock_data/`:
-    - `1. Volunteer Masterlist.xlsx`
-    - `Case Masterlist.xlsx`
-  - Run:
-    ```bash
-    yarn generate-all
-    ```
-  - This generates `src/server/types/sheets.ts` and `src/client/api/mockData.generated.ts`
-8. **HTTPS for local dev** (optional)
+4. **Configure sheets metadata**
+
+   **GAS (deployed):** Set Script Properties in the GAS editor:
+   - Push once, then open the project at [script.google.com](https://script.google.com)
+   - **Project Settings** (gear) → **Script properties** → Add:
+     - `SHEET_URL` – Volunteer spreadsheet URL
+     - `CASE_SHEET_URL` – Case spreadsheet URL
+     - `VOLUNTEER_SHEET_NAME` – e.g. `Volunteer Masterlist`
+     - `CASE_SHEET_NAME` – e.g. `Cases`
+     - `GOOGLE_MAPS_API_KEY` – Your Google Maps API key
+
+   **Local dev:** Copy `.env.example` to `.env` and fill in the same values:
+   ```bash
+   cp .env.example .env
+   ```
+   Scripts (`generate-types`, `generate-mock`) read from `.env`.
+
+5. **Generate types and mock data** (for local dev)
+   - Add XLSX files to `mock_data/`:
+     - `1. Volunteer Masterlist.xlsx`
+     - `Case Masterlist.xlsx`
+   - Run:
+     ```bash
+     yarn generate-all
+     ```
+   - This generates `src/server/types/sheets.ts` and `src/client/api/mockData.generated.ts`
+
+6. **HTTPS for local dev** (optional)
   ```bash
    yarn setup:https
   ```
@@ -72,7 +87,7 @@ Volunteer and Case lookup app built with React and Google Apps Script. Reads fro
 | `yarn generate-all`   | Run both                                   | Both files above                       |
 
 
-**Requirements:** Place `1. Volunteer Masterlist.xlsx` and `Case Masterlist.xlsx` in `mock_data/` before running.
+**Requirements:** Place `1. Volunteer Masterlist.xlsx` and `Case Masterlist.xlsx` in `mock_data/` before running. Scripts read `.env` for optional overrides (`VOLUNTEER_XLSX_PATH`, `CASE_XLSX_PATH`).
 
 ## Deploy to Production
 

@@ -1,6 +1,8 @@
 /**
- * Shared utilities for xlsx parsing scripts
+ * Shared utilities for xlsx parsing scripts.
+ * Loads .env for local dev config (VOLUNTEER_SHEET_URL, etc.).
  */
+import 'dotenv/config';
 import { existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -9,9 +11,12 @@ import XLSX from 'xlsx';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, '..');
 
+const defaultVolunteer = join(rootDir, 'mock_data', '1. Volunteer Masterlist.xlsx');
+const defaultCase = join(rootDir, 'mock_data', 'Case Masterlist.xlsx');
+
 export const paths = {
-  volunteer: join(rootDir, 'mock_data', '1. Volunteer Masterlist.xlsx'),
-  case: join(rootDir, 'mock_data', 'Case Masterlist.xlsx'),
+  volunteer: process.env.VOLUNTEER_XLSX_PATH || defaultVolunteer,
+  case: process.env.CASE_XLSX_PATH || defaultCase,
   sheetsTs: join(rootDir, 'src', 'server', 'types', 'sheets.ts'),
   mockGenerated: join(rootDir, 'src', 'client', 'api', 'mockData.generated.ts'),
 };

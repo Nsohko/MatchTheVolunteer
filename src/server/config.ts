@@ -1,13 +1,16 @@
 // ============================================================================
-// CONFIGURATION
+// CONFIGURATION - read from GAS Script Properties
+// ============================================================================
+// Set these in: Project Settings → Script properties (script.google.com)
+// For local dev, use .env (see .env.example)
 // ============================================================================
 
+const props = PropertiesService.getScriptProperties();
+
 export const CONFIG = {
-  SHEET_URL:
-    'https://docs.google.com/spreadsheets/d/18ZWFv487ODRBjjzBzWr09r2Dc5gMzmvnJvQ6ssI6FXk/edit?gid=1230460916#gid=1230460916',
-  CASE_SHEET_URL:
-    'https://docs.google.com/spreadsheets/d/1cObm1Qq-jS9RwW15Zc7G7DUrXg091EQAoJsppUNTg3U/edit?gid=0#gid=0',
-  VOLUNTEER_SHEET_NAME: 'Volunteer Masterlist',
-  CASE_SHEET_NAME: 'Cases',
+  VOLUNTEER_SHEET_URL: props.getProperty('VOLUNTEER_SHEET_URL') ?? '',
+  CASE_SHEET_URL: props.getProperty('CASE_SHEET_URL') ?? '',
+  VOLUNTEER_SHEET_NAME: props.getProperty('VOLUNTEER_SHEET_NAME') ?? 'Volunteer Masterlist',
+  CASE_SHEET_NAME: props.getProperty('CASE_SHEET_NAME') ?? 'Cases',
   GOOGLE_MAPS_API_KEY_PROPERTY: 'GOOGLE_MAPS_API_KEY',
 };

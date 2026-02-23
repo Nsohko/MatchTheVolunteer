@@ -84,7 +84,7 @@ export class VolunteerRepository {
   data: VolunteerRow[];
 
   constructor() {
-    this.spreadsheet = openSpreadsheet(CONFIG.SHEET_URL);
+    this.spreadsheet = openSpreadsheet(CONFIG.VOLUNTEER_SHEET_URL);
     this.sheet = getSheet(this.spreadsheet, CONFIG.VOLUNTEER_SHEET_NAME);
     const rawData = getAllData(this.sheet) as (string | number)[][];
     const headerRowIdx = findHeaderRowIndex(rawData, ["Code Number"]);
