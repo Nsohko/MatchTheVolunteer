@@ -70,11 +70,12 @@ TODO: Make it able to connect to sheets and map during local dev
 
 ## Pushing to GAS
 1. **Run ```yarn deploy```.**
-   This will push ur code to GAS
+   This will push ur code to GAS  
+   Overwrite manifest file if it asks
 
 2. **Configure sheets metadata fFrom your project page on GAS**
    **Project Settings** (gear) → **Script properties** → Add:
-     - `SHEET_URL` – Volunteer spreadsheet URL
+     - `VOLUNTEER_SHEET_URL` – Volunteer spreadsheet URL
      - `CASE_SHEET_URL` – Case spreadsheet URL
      - `VOLUNTEER_SHEET_NAME` – e.g. `Volunteer Masterlist`
      - `CASE_SHEET_NAME` – e.g. `Cases`
