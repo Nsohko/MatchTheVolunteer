@@ -11,7 +11,7 @@ import { paths, parseXlsx, ensureXlsxFilesExist } from './xlsx-utils.js';
 function escapeForTs(val) {
   if (val == null || val === '') return "''";
   if (typeof val === 'number') return String(val);
-  return `'${String(val).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+  return `'${String(val).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t')}'`;
 }
 
 function padRow(row, len) {

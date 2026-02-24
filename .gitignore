@@ -3,6 +3,7 @@ node_modules
 
 # clasp files
 creds.json
+.clasp.json
 
 # certs
 *.pem

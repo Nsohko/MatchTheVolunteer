@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getCasesList, getClosestVolunteersForCase } from '../api';
+import { getCasesList } from '../api/case';
+import { getClosestVolunteersForCase } from '../api/volunteer';
 import { Case, getCaseLabel } from '../../types/case';
 import { ClosestVolunteersResponse } from '../../types/volunteer';
 

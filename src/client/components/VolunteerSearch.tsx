@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { searchVolunteerByCode } from '../api';
 import { Volunteer } from '../../types/volunteer';
+import { searchVolunteerByCode } from '../api/volunteer';
 
 function VolunteerSearch() {
   const [code, setCode] = useState('');
