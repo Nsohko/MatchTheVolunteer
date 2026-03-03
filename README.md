@@ -17,7 +17,7 @@ Volunteer and Case lookup app built with React and Google Apps Script. Reads fro
 
 1. **Clone the repo**
    ```
-   git clone https://github.com/Nsohko/MatchTheVolunteer.git
+   git clone https://github.com/25STMY01/MatchTheVolunteer
    cd MatchTheVolunteer
    code .
    ```
