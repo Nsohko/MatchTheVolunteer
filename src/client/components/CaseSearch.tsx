@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { getCasesList } from '../api/case';
-import { getClosestVolunteersForCase, type VolunteerFilters } from '../api/volunteer';
+import { getClosestVolunteersForCase } from '../api/volunteer';
 import { Case, getCaseLabel } from '../../types/case';
-import { ClosestVolunteersResponse } from '../../types/volunteer';
+import { ClosestVolunteersResponse, VolunteerFilters } from '../../types/volunteer';
 
 const GENDER_OPTIONS = ['Male', 'Female'];
+// TODO: Generate options from sheet instead of hardcoding (for scalability)
 const RELIGION_OPTIONS = ['Buddhist', 'Catholic/Christian', 'Hindu', 'Muslim', 'Taoist', 'Others', 'No Religion'];
 
 function CaseSearch() {
@@ -23,7 +24,7 @@ function CaseSearch() {
 
   // Active filters applied when Search is clicked
   const [activeFilters, setActiveFilters] = useState<VolunteerFilters | null>(null);
-  const [activeK, setActiveK] = useState<number | null>(null);
+  const [activeK, setActiveK] = useState<number | undefined>(undefined);
 
   // Load cases
   useEffect(() => {
@@ -89,8 +90,8 @@ function CaseSearch() {
   };
 
   const handleSearch = () => {
-    const k = closestVolunteerCount ? parseInt(closestVolunteerCount, 10) : null;
-    if (k !== null && Number.isNaN(k)) {
+    const k = closestVolunteerCount ? parseInt(closestVolunteerCount, 10) : undefined;
+    if (k !== undefined && Number.isNaN(k)) {
       setError('Please enter a valid number for closest volunteers');
       return;
     }

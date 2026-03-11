@@ -1,6 +1,6 @@
 import { CaseRepository } from "../repository/CaseRepository";
 import { VolunteerRepository } from "../repository/VolunteerRepository";
-import { ClosestVolunteersResponse, Volunteer } from "../../types/volunteer";
+import { ClosestVolunteersResponse, Volunteer, VolunteerFilters } from "../../types/volunteer";
 import { findClosestVolunteers } from "../matching/location";
 
 export function getVolunteersList(): Volunteer[] {
@@ -19,12 +19,7 @@ export function searchVolunteerByCode(code: string): Volunteer {
   return volunteer;
 }
 
-export interface VolunteerFilters {
-  gender?: string | null;
-  religions?: string[];
-  languages?: string[];
-}
-
+// TODO: Update to match the mock version
 export function getClosestVolunteersForCase(
   caseRowId: string,
   k = 5,

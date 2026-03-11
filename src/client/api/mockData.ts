@@ -3,8 +3,7 @@
  * Uses volunteerData and caseData from mockData.generated (run yarn generate-mock).
  */
 import { Case } from '../../types/case';
-import { Volunteer, ClosestVolunteersResponse, VolunteerWithDistance } from '../../types/volunteer';
-import { VolunteerFilters } from './volunteer';
+import { Volunteer, ClosestVolunteersResponse, VolunteerWithDistance, VolunteerFilters } from '../../types/volunteer';
 import { volunteerData, caseData } from './mockData.generated';
 
 function findColIdx(headers: string[], terms: string[]): number {
@@ -175,9 +174,11 @@ export function mockSearchVolunteerByCode(code: string): Volunteer {
 
 function mockGetAllVolunteers(): Volunteer[] {
   const volunteers: Volunteer[] = [];
+  console.log("Volunteer Data: ", volunteerData);
   for (let i = 0; i < volunteerData.rows.length; i++) {
     const row = volunteerData.rows[i] ?? [];
     const volunteer = rowToVolunteer(volunteerData.headers, row);
+    if (i == 0) console.log("Volunteer: ", volunteer);
     // Only include volunteers with a code
     if (volunteer.code) {
       volunteers.push(volunteer);
@@ -224,7 +225,7 @@ export function mockGetCasesList(): Case[] {
   return cases;
 }
 
-export function mockGetClosestVolunteersForCase(
+export function mockGetMatchingVolunteersForCase(
   caseId: string,
   filters?: VolunteerFilters,
   k? : number
@@ -258,14 +259,16 @@ export function mockGetClosestVolunteersForCase(
   const candidates: VolunteerWithDistance[] = [];
 
   if (caseLocation && k) {
-    const areaIdx = findColIdx(volunteerData.headers, ['Which area', 'area of Singapore']);
+    console.log("Volunteers length: ", volunteers.length);
 
     for (let i = 0; i < volunteers.length && candidates.length < k; i++) {
+      console.log("ni hao");
       const volunteer = volunteers[i];
-      // const row = volunteerData.rows[i] ?? [];
       const area = volunteer.area;
+
+      console.log(volunteer);
+
       if (!area) continue;
-      // const volunteer = rowToVolunteer(volunteerData.headers, row);
 
       if (!volunteer.location) continue;
 
