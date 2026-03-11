@@ -1,6 +1,6 @@
 
 import { getCasesList } from "./handlers/case";
-import { getClosestVolunteersForCase, searchVolunteerByCode } from "./handlers/volunteer";
+import { getClosestVolunteersForCase, searchVolunteerByCode, getVolunteersList } from "./handlers/volunteer";
 
 
 /**
@@ -13,6 +13,6 @@ function doGet() {
 export {
   doGet,
   searchVolunteerByCode,
-  getCasesList,
+  getVolunteersList,
   getClosestVolunteersForCase
 };

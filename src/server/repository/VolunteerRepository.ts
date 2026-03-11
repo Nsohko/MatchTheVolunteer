@@ -87,7 +87,7 @@ export class VolunteerRepository {
     this.spreadsheet = openSpreadsheet(CONFIG.VOLUNTEER_SHEET_URL);
     this.sheet = getSheet(this.spreadsheet, CONFIG.VOLUNTEER_SHEET_NAME);
     const rawData = getAllData(this.sheet) as (string | number)[][];
-    const headerRowIdx = findHeaderRowIndex(rawData, ["Code Number"]);
+    const headerRowIdx = findHeaderRowIndex(rawData, ["Code Number", "Code", "SN"]);
     const headers = (rawData[headerRowIdx] ?? []).map((h) => String(h ?? ""));
 
     this.data = rawData
@@ -109,6 +109,36 @@ export class VolunteerRepository {
   getAll(): Volunteer[] {
     return this.data
       .filter((row) => getValueByHeaderMatch(row, VOLUNTEER_HEADER_MAP.code))
+      .map(volunteerRowToVolunteer);
+  }
+
+  getByGender(gender: string): Volunteer[] {
+    const targetGender = gender.trim().toLowerCase();
+    return this.data
+      .filter((row) => {
+        const volunteerGender = getValueByHeaderMatch(row, VOLUNTEER_HEADER_MAP.gender).toLowerCase();
+        return volunteerGender === targetGender;
+      })
+      .map(volunteerRowToVolunteer);
+  }
+
+  getByReligion(religions: string[]): Volunteer[] {
+    const targetReligions = religions.map((r) => r.trim().toLowerCase());
+    return this.data
+      .filter((row) => {
+        const volunteerReligion = getValueByHeaderMatch(row, VOLUNTEER_HEADER_MAP.religion).toLowerCase();
+        return targetReligions.includes(volunteerReligion);
+      })
+      .map(volunteerRowToVolunteer);
+  }
+
+  getByLanguages(languages: string[]): Volunteer[] {
+    const targetLanguages = languages.map((l) => l.trim().toLowerCase());
+    return this.data
+      .filter((row) => {
+        const volunteerLanguages = getValueByHeaderMatch(row, VOLUNTEER_HEADER_MAP.spokenLanguages).toLowerCase();
+        return targetLanguages.some((lang) => volunteerLanguages.includes(lang));
+      })
       .map(volunteerRowToVolunteer);
   }
 }
