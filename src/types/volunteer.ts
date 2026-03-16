@@ -3,7 +3,12 @@
  * Mapping from sheet headers (VolunteerRow) is done in the repository layer.
  * Day columns (Monday–Sunday) are converted to availabilities map.
  */
-export type Availabilities = Record<string, boolean>;
+
+export const TIME_SLOTS = ['Morning', 'Afternoon', 'Evening'] as const;
+
+export type TimeSlot = (typeof TIME_SLOTS)[number];
+
+export type Availabilities = Record<string, TimeSlot[]>;
 
 export const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;
 
@@ -16,7 +21,12 @@ export const DAY_HEADER_MAP: Record<(typeof DAYS)[number], string[]> = {
   Friday: ['Friday', '星期五'],
   Saturday: ['Saturday', '星期六'],
   Sunday: ['Sunday', '星期日'],
-};
+}; 
+
+export interface AvailabilitiesFilter {
+  day: typeof DAYS[number];
+  timeSlot: TimeSlot;
+}
 
 export interface Volunteer {
   sn: string;
@@ -53,7 +63,7 @@ export interface Volunteer {
   lostSomeoneRecent: string;
   employmentStatus: string;
 
-  /** Day name -> available (true if any time slot filled for that day) */
+  /** Day name -> available (TimeSlot of the day)*/
   availabilities: Availabilities;
 
   appliesToMe: string;

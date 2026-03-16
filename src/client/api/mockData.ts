@@ -2,9 +2,12 @@
  * Mock API implementations for local dev when GAS is unavailable.
  * Uses volunteerData and caseData from mockData.generated (run yarn generate-mock).
  */
+import { filterVolunteersByAvailabilities } from '../../server/matching/availabilities';
 import { Case } from '../../types/case';
-import { Volunteer, ClosestVolunteersResponse, VolunteerWithDistance } from '../../types/volunteer';
+import { Volunteer, ClosestVolunteersResponse, VolunteerWithDistance, AvailabilitiesFilter } from '../../types/volunteer';
+import { DAYS, DAY_HEADER_MAP, TimeSlot } from '../../types/volunteer';
 import { volunteerData, caseData } from './mockData.generated';
+
 
 function findColIdx(headers: string[], terms: string[]): number {
   for (let i = 0; i < headers.length; i++) {
@@ -65,7 +68,7 @@ function rowToVolunteer(headers: string[], row: (string | number)[]): Volunteer 
     isFamilyCaregiver: empty,
     lostSomeoneRecent: empty,
     employmentStatus: empty,
-    availabilities: {},
+    availabilities: buildMockAvailabilities(headers, row),
     appliesToMe: empty,
     interestsHobbiesTalents: empty,
     volunteerOptions: empty,
@@ -209,4 +212,37 @@ export function mockGetClosestVolunteersForCase(caseId: string): ClosestVoluntee
   }
 
   return candidates;
+}
+
+export function mockGetVolunteersByAvailability(
+  filters: AvailabilitiesFilter[]
+): Volunteer[] {
+  console.log("Filters received: ", filters);
+
+  const volunteers = volunteerData.rows.map((row) =>
+    rowToVolunteer(volunteerData.headers, row)
+  );
+  console.log('total volunteers:', volunteers.length);
+
+  console.log('sample availabilities:', volunteers[0]?.availabilities);
+
+  const filtered = filterVolunteersByAvailabilities(volunteers, filters);
+  console.log('filtered volunteers:', filtered.length);
+  return filtered;
+
+}
+
+function buildMockAvailabilities(headers: string[], row: (string | number)[]): Record<string, TimeSlot[]> {
+  const availabilities: Record<string, TimeSlot[]> = {};
+  for (const day of DAYS) {
+    const searchTerms = DAY_HEADER_MAP[day];
+    const colIdx = findColIdx(headers, searchTerms);
+    const val = colIdx >= 0 ? String(row[colIdx] ?? '') : '';
+    const slots: TimeSlot[] = [];
+    if (val.includes('Morning')) slots.push('Morning');
+    if (val.includes('Afternoon')) slots.push('Afternoon');
+    if (val.includes('Evening')) slots.push('Evening');
+    availabilities[day] = slots;
+  }
+  return availabilities;
 }
