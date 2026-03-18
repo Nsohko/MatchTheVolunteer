@@ -261,6 +261,7 @@ export function mockGetMatchingVolunteersForCase(
   if (caseLocation && k) {
     console.log("Volunteers length: ", volunteers.length);
 
+    // TODO: Should not terminate when candidates.length < k, we need to get distance for ALL volunteers then filter k nearest.
     for (let i = 0; i < volunteers.length && candidates.length < k; i++) {
       console.log("ni hao");
       const volunteer = volunteers[i];
@@ -276,6 +277,8 @@ export function mockGetMatchingVolunteersForCase(
       const distanceKm = 1 + candidates.length * 1.5;
       candidates.push({ volunteer, distanceKm });
     }
+
+    // TODO: Sort candidates by distance here then push the first k into candidates
   } else {
     // Mock distance: use index-based fake values (no real API in mock)
     for (let i = 0; i < volunteers.length && candidates.length < 8; i++) {
