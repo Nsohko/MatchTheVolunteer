@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import VolunteerSearch from '../components/VolunteerSearch';
 import CaseSearch from '../components/CaseSearch';
-type Tab = 'volunteer' | 'case';
+import AvailabilitySearch from '../components/AvailabilitySearch';
+
+type Tab = 'volunteer' | 'case' | 'availability';
 
 function HomePage() {
   const [activeTab, setActiveTab] = useState<Tab>('volunteer');
@@ -48,17 +50,25 @@ function HomePage() {
         >
           Case Search
         </button>
+        <button
+          type="button"
+          className={`tab-button ${activeTab === 'availability' ? 'active' : ''}`}
+          onClick={() => switchTab('availability')}
+        >
+          Availability Search
+        </button>
       </div>
 
-      <div
-        id="volunteer"
-        className={`tab-content ${activeTab === 'volunteer' ? 'active' : ''}`}
-      >
+      <div id="volunteer" className={`tab-content ${activeTab === 'volunteer' ? 'active' : ''}`}>
         <VolunteerSearch />
       </div>
 
       <div id="case" className={`tab-content ${activeTab === 'case' ? 'active' : ''}`}>
         <CaseSearch />
+      </div>
+
+      <div id="availability" className={`tab-content ${activeTab === 'availability' ? 'active' : ''}`}>
+        <AvailabilitySearch />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 
 import { getCasesList } from "./handlers/case";
-import { getClosestVolunteersForCase, searchVolunteerByCode } from "./handlers/volunteer";
+import { getVolunteerByAvailabilities, getClosestVolunteersForCase, searchVolunteerByCode } from "./handlers/volunteer";
 
 
 /**
@@ -14,5 +14,6 @@ export {
   doGet,
   searchVolunteerByCode,
   getCasesList,
-  getClosestVolunteersForCase
+  getClosestVolunteersForCase,
+  getVolunteerByAvailabilities
 };

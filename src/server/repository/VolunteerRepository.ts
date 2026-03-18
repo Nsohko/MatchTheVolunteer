@@ -1,16 +1,20 @@
 import { CONFIG } from "../config";
-import type { Volunteer } from "../../types/volunteer";
+import type { TimeSlot, Volunteer } from "../../types/volunteer";
 import { DAY_HEADER_MAP, DAYS } from "../../types/volunteer";
 import { VOLUNTEER_HEADER_MAP } from "../../types/volunteer";
 import type { VolunteerRow } from "../../types/sheets";
 import { getValueByHeaderMatch, rowToObject } from "./utils";
 import { openSpreadsheet, getSheet, getAllData, findHeaderRowIndex } from "../utils/sheets";
 
-function buildAvailabilities(row: VolunteerRow): Record<string, boolean> {
-  const availabilities: Record<string, boolean> = {};
+function buildAvailabilities(row: VolunteerRow): Record<string, TimeSlot[]> {
+  const availabilities: Record<string, TimeSlot[]> = {};
   for (const day of DAYS) {
     const val = getValueByHeaderMatch(row, DAY_HEADER_MAP[day]);
-    availabilities[day] = val.length > 0;
+    const slots: TimeSlot[] = [];
+    if (val.includes("Morning")) slots.push("Morning");
+    if (val.includes("Afternoon")) slots.push("Afternoon");
+    if (val.includes("Evening")) slots.push("Evening");
+    availabilities[day] = slots;
   }
   return availabilities;
 }
