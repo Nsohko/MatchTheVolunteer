@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getCasesList } from '../api/case';
-import { getClosestVolunteersForCase } from '../api/volunteer';
+import { getMatchingVolunteersForCase } from '../api/volunteer';
 import { Case, getCaseLabel } from '../../types/case';
 import { ClosestVolunteersResponse, VolunteerFilters } from '../../types/volunteer';
 
@@ -68,7 +68,7 @@ function CaseSearch() {
     const c = cases.find((x) => x.id === selectedCaseId);
     if (!c) return;
 
-    getClosestVolunteersForCase(selectedCaseId, activeFilters, activeK)
+    getMatchingVolunteersForCase(selectedCaseId, activeFilters, activeK)
       .then((result) => {
         setLoadingVolunteers(false);
         setClosestVolunteers(result);

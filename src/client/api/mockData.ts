@@ -178,7 +178,6 @@ function mockGetAllVolunteers(): Volunteer[] {
   for (let i = 0; i < volunteerData.rows.length; i++) {
     const row = volunteerData.rows[i] ?? [];
     const volunteer = rowToVolunteer(volunteerData.headers, row);
-    if (i == 0) console.log("Volunteer: ", volunteer);
     // Only include volunteers with a code
     if (volunteer.code) {
       volunteers.push(volunteer);
@@ -187,23 +186,23 @@ function mockGetAllVolunteers(): Volunteer[] {
   return volunteers;
 }
 
-function mockGetVolunteersByGender(gender: string): Volunteer[] {
+function mockGetVolunteersByGender(gender: string, volunteers: Volunteer[]): Volunteer[] {
   const targetGender = gender.trim().toLowerCase();
-  return mockGetAllVolunteers().filter(v => 
+  return volunteers.filter(v => 
     v.gender.toLowerCase() === targetGender
   );
 }
 
-function mockGetVolunteersByReligion(religions: string[]): Volunteer[] {
+function mockGetVolunteersByReligion(religions: string[], volunteers: Volunteer[]): Volunteer[] {
   const targetReligions = religions.map(r => r.trim().toLowerCase());
-  return mockGetAllVolunteers().filter(v =>
+  return volunteers.filter(v =>
     targetReligions.includes(v.religion.toLowerCase())
   );
 }
 
-function mockGetVolunteersByLanguages(languages: string[]): Volunteer[] {
+function mockGetVolunteersByLanguages(languages: string[], volunteers: Volunteer[]): Volunteer[] {
   const targetLanguages = languages.map(l => l.trim().toLowerCase());
-  return mockGetAllVolunteers().filter(v =>
+  return volunteers.filter(v =>
     targetLanguages.some(lang => v.spokenLanguages.toLowerCase().includes(lang))
   );
 }
@@ -243,16 +242,16 @@ export function mockGetMatchingVolunteersForCase(
   let volunteers = mockGetAllVolunteers();
 
   if (filters?.gender) {
-    volunteers = mockGetVolunteersByGender(filters.gender);
+    volunteers = mockGetVolunteersByGender(filters.gender, volunteers);
   }
 
   if (filters?.religions && filters.religions.length > 0) {
-    const religiousVolunteers = mockGetVolunteersByReligion(filters.religions);
+    const religiousVolunteers = mockGetVolunteersByReligion(filters.religions, volunteers);
     volunteers = volunteers.filter(v => religiousVolunteers.some(rv => rv.code === v.code));
   }
 
   if (filters?.languages && filters.languages.length > 0) {
-    const languageVolunteers = mockGetVolunteersByLanguages(filters.languages);
+    const languageVolunteers = mockGetVolunteersByLanguages(filters.languages, volunteers);
     volunteers = volunteers.filter(v => languageVolunteers.some(lv => lv.code === v.code));
   }
 
@@ -262,7 +261,7 @@ export function mockGetMatchingVolunteersForCase(
     console.log("Volunteers length: ", volunteers.length);
 
     // TODO: Should not terminate when candidates.length < k, we need to get distance for ALL volunteers then filter k nearest.
-    for (let i = 0; i < volunteers.length && candidates.length < k; i++) {
+    for (let i = 0; i < volunteers.length; i++) {
       console.log("ni hao");
       const volunteer = volunteers[i];
       const area = volunteer.area;
@@ -278,7 +277,9 @@ export function mockGetMatchingVolunteersForCase(
       candidates.push({ volunteer, distanceKm });
     }
 
-    // TODO: Sort candidates by distance here then push the first k into candidates
+    candidates.sort((a, b) => a.distanceKm - b.distanceKm);
+    return candidates.slice(0, k);
+
   } else {
     // Mock distance: use index-based fake values (no real API in mock)
     for (let i = 0; i < volunteers.length && candidates.length < 8; i++) {

@@ -20,13 +20,13 @@ export async function searchVolunteerByCode(code: string): Promise<Volunteer> {
     });
   }
 
-// TODO: Rename to getMatchingVolunteersForCase & update other imports
-export async function getClosestVolunteersForCase(
+export async function getMatchingVolunteersForCase(
   caseId: string,
   filters?: VolunteerFilters,
   k?: number
 ): Promise<ClosestVolunteersResponse> {
     if (isGasAvailable()) {
+      // TODO: Rename to getMatchingVolunteersForCase in serverFunctions once logic is implemented
       return serverFunctions.getClosestVolunteersForCase(caseId, k || 5, filters);
     }
     return new Promise((resolve) => {
