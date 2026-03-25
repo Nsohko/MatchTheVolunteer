@@ -5,7 +5,12 @@
 // For local dev, use .env (see .env.example)
 // ============================================================================
 
-const props = PropertiesService.getScriptProperties();
+const props =
+  typeof PropertiesService !== 'undefined'
+    ? PropertiesService.getScriptProperties()
+    : {
+        getProperty: (key: string) => process.env[key] ?? null,
+      };
 
 export const CONFIG = {
   VOLUNTEER_SHEET_URL: props.getProperty('VOLUNTEER_SHEET_URL') ?? '',

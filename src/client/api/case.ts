@@ -1,6 +1,6 @@
-import { serverFunctions } from ".";
-import { Case } from "../../types/case";
+import { invokeRpc } from './transport';
+import type { Case } from '../../types/case';
 
 export async function getCasesList(): Promise<Case[]> {
-  return serverFunctions.getCasesList();
+  return invokeRpc<Case[]>('getCasesList', []);
 }
