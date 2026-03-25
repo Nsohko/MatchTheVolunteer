@@ -117,3 +117,9 @@ export interface VolunteerWithDistance {
 }
 
 export type ClosestVolunteersResponse = VolunteerWithDistance[];
+
+export interface VolunteerFilters {
+  gender?: string | null;
+  religions?: string[];
+  languages?: string[];
+}

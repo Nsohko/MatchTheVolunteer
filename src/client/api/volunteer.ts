@@ -1,6 +1,15 @@
 import { isGasAvailable, serverFunctions } from ".";
-import { Volunteer, ClosestVolunteersResponse } from "../../types/volunteer";
-import { mockSearchVolunteerByCode, mockGetClosestVolunteersForCase } from "./mockData";
+import { Volunteer, ClosestVolunteersResponse, VolunteerFilters } from "../../types/volunteer";
+import { mockSearchVolunteerByCode, mockGetMatchingVolunteersForCase, mockGetVolunteersList } from "./mockData";
+
+export async function getVolunteersList(): Promise<Volunteer[]> {
+  if (isGasAvailable()) {
+    return serverFunctions.getVolunteersList();
+  }
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(mockGetVolunteersList()), 300);
+  });
+}
 
 export async function searchVolunteerByCode(code: string): Promise<Volunteer> {
     if (isGasAvailable()) {
@@ -11,11 +20,16 @@ export async function searchVolunteerByCode(code: string): Promise<Volunteer> {
     });
   }
 
-export async function getClosestVolunteersForCase(caseId: string): Promise<ClosestVolunteersResponse> {
+export async function getMatchingVolunteersForCase(
+  caseId: string,
+  filters?: VolunteerFilters,
+  k?: number
+): Promise<ClosestVolunteersResponse> {
     if (isGasAvailable()) {
-      return serverFunctions.getClosestVolunteersForCase(caseId);
+      // TODO: Rename to getMatchingVolunteersForCase in serverFunctions once logic is implemented
+      return serverFunctions.getClosestVolunteersForCase(caseId, k || 5, filters);
     }
     return new Promise((resolve) => {
-      setTimeout(() => resolve(mockGetClosestVolunteersForCase(caseId)), 300);
+      setTimeout(() => resolve(mockGetMatchingVolunteersForCase(caseId, filters, k)), 300);
     });
   }

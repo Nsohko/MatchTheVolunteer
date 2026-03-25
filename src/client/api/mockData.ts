@@ -3,7 +3,7 @@
  * Uses volunteerData and caseData from mockData.generated (run yarn generate-mock).
  */
 import { Case } from '../../types/case';
-import { Volunteer, ClosestVolunteersResponse, VolunteerWithDistance } from '../../types/volunteer';
+import { Volunteer, ClosestVolunteersResponse, VolunteerWithDistance, VolunteerFilters } from '../../types/volunteer';
 import { volunteerData, caseData } from './mockData.generated';
 
 function findColIdx(headers: string[], terms: string[]): number {
@@ -31,6 +31,8 @@ function rowToVolunteer(headers: string[], row: (string | number)[]): Volunteer 
   const emailIdx = findColIdx(headers, ['Email', '电邮']);
   const contactIdx = findColIdx(headers, ['Contact number', '联络号码']);
   const genderIdx = findColIdx(headers, ['Gender', '性别']);
+  const religionIdx = findColIdx(headers, ['Religion', '宗教']);
+  const spokenLanguagesIdx = findColIdx(headers, ['Spoken Languages', '口语']);
   const area = getVal(row, areaIdx);
   const location = area ? `${area}, Singapore` : null;
 
@@ -54,14 +56,14 @@ function rowToVolunteer(headers: string[], row: (string | number)[]): Volunteer 
     contactNumber: getVal(row, contactIdx),
     gender: getVal(row, genderIdx),
     ageRange: empty,
-    religion: empty,
+    religion: getVal(row, religionIdx),
     area,
     languagePreferenceForTraining: empty,
     volunteeringExperiences: empty,
     volunteerExperienceDetails: empty,
     trainingCourses: empty,
     trainingCourseDetails: empty,
-    spokenLanguages: empty,
+    spokenLanguages: getVal(row, spokenLanguagesIdx),
     isFamilyCaregiver: empty,
     lostSomeoneRecent: empty,
     employmentStatus: empty,
@@ -170,6 +172,45 @@ export function mockSearchVolunteerByCode(code: string): Volunteer {
   throw new Error(`Volunteer not found with code: ${code}`);
 }
 
+function mockGetAllVolunteers(): Volunteer[] {
+  const volunteers: Volunteer[] = [];
+  console.log("Volunteer Data: ", volunteerData);
+  for (let i = 0; i < volunteerData.rows.length; i++) {
+    const row = volunteerData.rows[i] ?? [];
+    const volunteer = rowToVolunteer(volunteerData.headers, row);
+    // Only include volunteers with a code
+    if (volunteer.code) {
+      volunteers.push(volunteer);
+    }
+  }
+  return volunteers;
+}
+
+function mockGetVolunteersByGender(gender: string, volunteers: Volunteer[]): Volunteer[] {
+  const targetGender = gender.trim().toLowerCase();
+  return volunteers.filter(v => 
+    v.gender.toLowerCase() === targetGender
+  );
+}
+
+function mockGetVolunteersByReligion(religions: string[], volunteers: Volunteer[]): Volunteer[] {
+  const targetReligions = religions.map(r => r.trim().toLowerCase());
+  return volunteers.filter(v =>
+    targetReligions.includes(v.religion.toLowerCase())
+  );
+}
+
+function mockGetVolunteersByLanguages(languages: string[], volunteers: Volunteer[]): Volunteer[] {
+  const targetLanguages = languages.map(l => l.trim().toLowerCase());
+  return volunteers.filter(v =>
+    targetLanguages.some(lang => v.spokenLanguages.toLowerCase().includes(lang))
+  );
+}
+
+export function mockGetVolunteersList(): Volunteer[] {
+  return mockGetAllVolunteers();
+}
+
 export function mockGetCasesList(): Case[] {
   const cases: Case[] = [];
   for (let i = 0; i < caseData.rows.length; i++) {
@@ -183,7 +224,11 @@ export function mockGetCasesList(): Case[] {
   return cases;
 }
 
-export function mockGetClosestVolunteersForCase(caseId: string): ClosestVolunteersResponse {
+export function mockGetMatchingVolunteersForCase(
+  caseId: string,
+  filters?: VolunteerFilters,
+  k? : number
+): ClosestVolunteersResponse {
   const caseIdx = parseInt(caseId, 10);
   if (Number.isNaN(caseIdx) || caseIdx < 1) return [];
 
@@ -192,21 +237,58 @@ export function mockGetClosestVolunteersForCase(caseId: string): ClosestVoluntee
 
   const caseObj = rowToCase(caseData.headers, caseRow, caseIdx);
   const caseLocation = caseObj.location;
-  if (!caseLocation) return [];
 
-  const areaIdx = findColIdx(volunteerData.headers, ['Which area', 'area of Singapore']);
+  // Apply filters to get filtered volunteers
+  let volunteers = mockGetAllVolunteers();
+
+  if (filters?.gender) {
+    volunteers = mockGetVolunteersByGender(filters.gender, volunteers);
+  }
+
+  if (filters?.religions && filters.religions.length > 0) {
+    const religiousVolunteers = mockGetVolunteersByReligion(filters.religions, volunteers);
+    volunteers = volunteers.filter(v => religiousVolunteers.some(rv => rv.code === v.code));
+  }
+
+  if (filters?.languages && filters.languages.length > 0) {
+    const languageVolunteers = mockGetVolunteersByLanguages(filters.languages, volunteers);
+    volunteers = volunteers.filter(v => languageVolunteers.some(lv => lv.code === v.code));
+  }
+
   const candidates: VolunteerWithDistance[] = [];
 
-  for (let i = 0; i < volunteerData.rows.length && candidates.length < 5; i++) {
-    const row = volunteerData.rows[i] ?? [];
-    const area = getVal(row, areaIdx);
-    if (!area) continue;
-    const volunteer = rowToVolunteer(volunteerData.headers, row);
-    if (!volunteer.location) continue;
+  if (caseLocation && k) {
+    console.log("Volunteers length: ", volunteers.length);
+
+    // TODO: Should not terminate when candidates.length < k, we need to get distance for ALL volunteers then filter k nearest.
+    for (let i = 0; i < volunteers.length; i++) {
+      console.log("ni hao");
+      const volunteer = volunteers[i];
+      const area = volunteer.area;
+
+      console.log(volunteer);
+
+      if (!area) continue;
+
+      if (!volunteer.location) continue;
+
+      // Mock distance: use index-based fake values (no real API in mock)
+      const distanceKm = 1 + candidates.length * 1.5;
+      candidates.push({ volunteer, distanceKm });
+    }
+
+    candidates.sort((a, b) => a.distanceKm - b.distanceKm);
+    return candidates.slice(0, k);
+
+  } else {
     // Mock distance: use index-based fake values (no real API in mock)
-    const distanceKm = 1 + candidates.length * 1.5;
-    candidates.push({ volunteer, distanceKm });
+    for (let i = 0; i < volunteers.length && candidates.length < 8; i++) {
+      const volunteer = volunteers[i];
+      candidates.push({ volunteer, distanceKm: 0 }); // Placeholder distance value of 0
+    }
   }
+
+  console.log(`[MOCK DEBUG] Applied filters: ${volunteers.length} volunteers match`);
 
   return candidates;
 }
