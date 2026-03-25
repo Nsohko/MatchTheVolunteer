@@ -2,29 +2,16 @@
  * External: Google Maps Distance Matrix API client.
  * Outbound HTTP calls from server to Google.
  */
-import { CONFIG } from '../config';
-
-function safeLog(msg: string): void {
-  if (typeof Logger !== 'undefined') {
-    Logger.log(msg);
-  }
-}
+import { MatrixJson } from '../../types/external';
+import { CONFIG, getScriptProperty } from '../config';
+import { safeLog } from '../utils/misc';
 
 function getApiKey(): string | null {
-  if (typeof PropertiesService !== 'undefined') {
-    const key = PropertiesService.getScriptProperties().getProperty(
-      CONFIG.GOOGLE_MAPS_API_KEY_PROPERTY
-    );
-    if (!key) {
-      safeLog('ERROR: GOOGLE_MAPS_API_KEY not set in Script Properties');
-    }
-    return key;
+  const key = getScriptProperty(CONFIG.GOOGLE_MAPS_API_KEY_PROPERTY);
+  if (!key && typeof PropertiesService !== 'undefined') {
+    safeLog('ERROR: GOOGLE_MAPS_API_KEY not set in Script Properties');
   }
-  const fromEnv =
-    process.env[CONFIG.GOOGLE_MAPS_API_KEY_PROPERTY] ??
-    process.env.GOOGLE_MAPS_API_KEY ??
-    null;
-  return fromEnv || null;
+  return key;
 }
 
 function buildDistanceMatrixUrl(
@@ -42,12 +29,6 @@ function buildDistanceMatrixUrl(
   ].join('&');
   return `${base}?${params}`;
 }
-
-type MatrixJson = {
-  status?: string;
-  error_message?: string;
-  rows?: { elements?: { status?: string; distance?: { value: number } }[] }[];
-};
 
 function parseDistanceMatrixResponse(
   responseText: string,
@@ -87,6 +68,41 @@ function parseDistanceMatrixResponse(
   return (el0.distance?.value ?? 0) / 1000.0;
 }
 
+function getResponseGas(url: string): [number, string] {
+  const resp = UrlFetchApp.fetch(url, {
+    muteHttpExceptions: true,
+  });
+  return [resp.getResponseCode(), resp.getContentText()];
+}
+
+async function getResponseFetch(url: string): Promise<[number, string]> {
+  const resp = await fetch(url);
+  const text = await resp.text();
+  return [resp.status, text];
+}
+
+function distanceFromHttpResult(
+  responseCode: number,
+  responseText: string,
+  origin: string,
+  destination: string
+): number | { error: string } {
+  if (responseCode !== 200) {
+    const errorMsg = `HTTP ${responseCode}: ${responseText.substring(
+      0,
+      100
+    )}`;
+    safeLog(
+      `ERROR: Google API returned code ${responseCode}: ${responseText.substring(
+        0,
+        200
+      )}`
+    );
+    return { error: errorMsg };
+  }
+  return parseDistanceMatrixResponse(responseText, origin, destination);
+}
+
 export function calculateDistance(
   origin: string,
   destination: string
@@ -103,27 +119,8 @@ export function calculateDistance(
   const url = buildDistanceMatrixUrl(origin, destination, apiKey);
 
   try {
-    const resp = UrlFetchApp.fetch(url, {
-      muteHttpExceptions: true,
-    });
-    const responseCode = resp.getResponseCode();
-    const responseText = resp.getContentText();
-
-    if (responseCode !== 200) {
-      const errorMsg = `HTTP ${responseCode}: ${responseText.substring(
-        0,
-        100
-      )}`;
-      safeLog(
-        `ERROR: Google API returned code ${responseCode}: ${responseText.substring(
-          0,
-          200
-        )}`
-      );
-      return { error: errorMsg };
-    }
-
-    return parseDistanceMatrixResponse(responseText, origin, destination);
+    const [responseCode, responseText] = getResponseGas(url);
+    return distanceFromHttpResult(responseCode, responseText, origin, destination);
   } catch (e) {
     const errorMsg = `Exception: ${(e as Error).toString()}`;
     safeLog(
@@ -135,33 +132,22 @@ export function calculateDistance(
   }
 }
 
-/** Node / local — same API as {@link calculateDistance} using global `fetch`. */
+/** Node / local — same contract as {@link calculateDistance} using global `fetch`. */
 export async function calculateDistanceAsync(
   origin: string,
   destination: string
 ): Promise<number | { error: string }> {
+
   const apiKey = getApiKey();
   if (!apiKey) {
-    return { error: 'GOOGLE_MAPS_API_KEY not set (use .env for local dev)' };
+    return { error: 'API key not set (GOOGLE_MAPS_API_KEY)' };
   }
 
   const url = buildDistanceMatrixUrl(origin, destination, apiKey);
 
   try {
-    const resp = await fetch(url);
-    const responseText = await resp.text();
-
-    if (!resp.ok) {
-      const errorMsg = `HTTP ${resp.status}: ${responseText.substring(0, 100)}`;
-      safeLog(
-        `ERROR: Google API returned code ${
-          resp.status
-        }: ${responseText.substring(0, 200)}`
-      );
-      return { error: errorMsg };
-    }
-
-    return parseDistanceMatrixResponse(responseText, origin, destination);
+    const [responseCode, responseText] = await getResponseFetch(url);
+    return distanceFromHttpResult(responseCode, responseText, origin, destination);
   } catch (e) {
     const errorMsg = `Exception: ${(e as Error).toString()}`;
     safeLog(
@@ -171,59 +157,4 @@ export async function calculateDistanceAsync(
     );
     return { error: errorMsg };
   }
-}
-
-export function testConnection(): { success: boolean; message: string } {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    return {
-      success: false,
-      message:
-        'ERROR: API key not set. Go to Project Settings -> Script Properties and add GOOGLE_MAPS_API_KEY',
-    };
-  }
-
-  safeLog(
-    `API Key found (length: ${apiKey.length}, starts with: ${apiKey.substring(
-      0,
-      10
-    )}...)`
-  );
-
-  const origin = 'Yishun, Singapore';
-  const destination = 'Marina Bay, Singapore';
-
-  const distResult = calculateDistance(origin, destination);
-
-  if (
-    distResult === null ||
-    (typeof distResult === 'object' && distResult.error)
-  ) {
-    const errorMsg =
-      typeof distResult === 'object' && distResult.error
-        ? distResult.error
-        : 'Unknown error';
-    safeLog(`ERROR: Distance calculation failed: ${errorMsg}`);
-    return {
-      success: false,
-      message: `ERROR: Distance calculation failed: ${errorMsg}\n\nCheck View -> Logs in Apps Script editor for more details.`,
-    };
-  }
-
-  const dist = typeof distResult === 'number' ? distResult : null;
-  if (dist == null) {
-    safeLog('ERROR: Invalid distance result');
-    return {
-      success: false,
-      message: 'ERROR: Invalid distance result',
-    };
-  }
-
-  safeLog(`SUCCESS: Distance from ${origin} to ${destination} = ${dist} km`);
-  return {
-    success: true,
-    message: `SUCCESS: API key is working! Distance from ${origin} to ${destination} = ${dist.toFixed(
-      2
-    )} km`,
-  };
 }
