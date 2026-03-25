@@ -12,6 +12,7 @@ const defaultCaseXlsxPath = join(
   '..',
   '..',
   '..',
+  '..',
   'local_data',
   'Case Masterlist.xlsx'
 );

@@ -12,6 +12,7 @@ const defaultVolunteerXlsxPath = join(
   '..',
   '..',
   '..',
+  '..',
   'local_data',
   '1. Volunteer Masterlist.xlsx'
 );
