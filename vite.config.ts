@@ -90,11 +90,11 @@ const GAS_EXPORTS_ARG = `(function(){var g=typeof globalThis!=="undefined"?globa
 function stubLocalXlsxReadersForGasBundle(): Plugin {
   const caseStub = resolve(
     __dirname,
-    'src/server/repository/readCaseSheetFromLocalXlsx.stub.ts'
+    'src/server/repository/mock/readCaseSheetFromLocalXlsx.stub.ts'
   );
   const volunteerStub = resolve(
     __dirname,
-    'src/server/repository/readVolunteerSheetFromLocalXlsx.stub.ts'
+    'src/server/repository/mock/readVolunteerSheetFromLocalXlsx.stub.ts'
   );
   return {
     name: 'mtv-stub-local-xlsx-for-gas',

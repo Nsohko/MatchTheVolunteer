@@ -2,10 +2,10 @@ import { existsSync } from 'fs';
 import { dirname, isAbsolute, join } from 'path';
 import { fileURLToPath } from 'url';
 import XLSX from 'xlsx';
-import type { CaseRow } from '../../types/sheets';
-import { CONFIG } from '../config';
-import { findHeaderRowIndex } from '../utils/sheets';
-import { rowToObject } from './utils';
+import type { CaseRow } from '../../../types/sheets';
+import { CONFIG } from '../../config';
+import { findHeaderRowIndex } from '../../utils/sheets';
+import { rowToObject } from '../utils';
 
 const defaultCaseXlsxPath = join(
   dirname(fileURLToPath(import.meta.url)),

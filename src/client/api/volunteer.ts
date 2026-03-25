@@ -5,13 +5,14 @@ import type {
 } from '../../types/volunteer';
 
 export async function searchVolunteerByCode(code: string): Promise<Volunteer> {
-  return invokeRpc<Volunteer>('searchVolunteerByCode', [code]);
+  return invokeRpc('searchVolunteerByCode', code);
 }
 
 export async function getClosestVolunteersForCase(
-  caseId: string
+  caseId: string,
+  k?: number
 ): Promise<ClosestVolunteersResponse> {
-  return invokeRpc<ClosestVolunteersResponse>('getClosestVolunteersForCase', [
-    caseId,
-  ]);
+  return k === undefined
+    ? invokeRpc('getClosestVolunteersForCase', caseId)
+    : invokeRpc('getClosestVolunteersForCase', caseId, k);
 }

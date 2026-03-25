@@ -3,7 +3,7 @@ import type { Case } from "../../types/case";
 import { CASE_HEADER_MAP } from "../../types/case";
 import type { CaseRow } from "../../types/sheets";
 import { findHeaderRowIndex, getAllData, getSheet, openSpreadsheet } from "../utils/sheets";
-import { readCaseRowsFromLocalCaseXlsx } from "./readCaseSheetFromLocalXlsx";
+import { readCaseRowsFromLocalCaseXlsx } from "./mock/readCaseSheetFromLocalXlsx";
 import { getValueByHeaderMatch, rowToObject } from "./utils";
 
 function caseRowToCase(rowIndex: number, row: CaseRow): Case {

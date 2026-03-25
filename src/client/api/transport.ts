@@ -3,7 +3,11 @@
  */
 import { GASClient } from 'gas-client';
 import type * as ServerTypes from '../../server';
-import type { RpcHandlerName } from '../../server/rpcHandlers';
+import type {
+  RpcArgs,
+  RpcHandlerName,
+  RpcReturn,
+} from '../../server/rpcHandlers';
 
 function gasAllowedOrigins(origin: string): boolean {
   return (
@@ -49,33 +53,28 @@ async function localRpc<T>(name: RpcHandlerName, args: unknown[]): Promise<T> {
   return data.result as T;
 }
 
-/** Unwrap gas-client Promise + possible async server function Promise. */
-async function unwrapServerResult<T>(out: unknown): Promise<T> {
-  let v = await Promise.resolve(out);
-  if (v instanceof Promise) {
-    v = await v;
+async function googleRpc<T>(name: RpcHandlerName, args: unknown[]): Promise<T> {
+  const fns = getGasClient().serverFunctions as unknown as Record<
+    RpcHandlerName,
+    (...a: unknown[]) => unknown
+  >;
+  const fn = fns[name];
+  if (typeof fn !== 'function') {
+    throw new Error(`Unknown GAS function: ${String(name)}`);
   }
-  return v as T;
+  return fn(args) as T
 }
 
 /**
- * Call a server function by name with a JSON-serializable argument list
- * (must match the handler signature order).
+ * Call a server RPC by name. Args and return type match `rpcHandlers[name]` on the server.
  */
-export async function invokeRpc<T>(
-  name: RpcHandlerName,
-  args: unknown[]
-): Promise<T> {
+export async function invokeRpc<K extends RpcHandlerName>(
+  name: K,
+  ...args: RpcArgs<K>
+): Promise<RpcReturn<K>> {
+  const argArray = args as unknown as unknown[];
   if (isGasAvailable()) {
-    const fns = getGasClient().serverFunctions as unknown as Record<
-      RpcHandlerName,
-      (...a: unknown[]) => unknown
-    >;
-    const fn = fns[name];
-    if (typeof fn !== 'function') {
-      throw new Error(`Unknown GAS function: ${String(name)}`);
-    }
-    return unwrapServerResult<T>(fn(...args));
+    return googleRpc<RpcReturn<K>>(name, argArray);
   }
-  return localRpc<T>(name, args);
+  return localRpc<RpcReturn<K>>(name, argArray);
 }
