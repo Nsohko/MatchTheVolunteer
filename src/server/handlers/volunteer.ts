@@ -12,6 +12,11 @@ export function searchVolunteerByCode(code: string): Volunteer {
   return volunteer;
 }
 
+export function getVolunteersList(): Volunteer[] {
+  const repository = new VolunteerRepository();
+  return repository.getAll();
+}
+
 export function getClosestVolunteersForCase(
   caseRowId: string,
   k = 5

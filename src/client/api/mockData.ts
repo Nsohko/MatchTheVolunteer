@@ -25,6 +25,7 @@ function getVal(row: (string | number)[], colIdx: number): string {
 function rowToVolunteer(headers: string[], row: (string | number)[]): Volunteer {
   const codeIdx = findColIdx(headers, ['Code Number']);
   const areaIdx = findColIdx(headers, ['Which area', 'area of Singapore']);
+  const interestsIdx = findColIdx(headers, ['20.', 'interests', 'hobbies', 'talents']);
   const snIdx = findColIdx(headers, ['SN']);
   const givenIdx = findColIdx(headers, ['Given Name', '名字']);
   const lastIdx = findColIdx(headers, ['Last Name', '姓氏']);
@@ -67,7 +68,7 @@ function rowToVolunteer(headers: string[], row: (string | number)[]): Volunteer 
     employmentStatus: empty,
     availabilities: {},
     appliesToMe: empty,
-    interestsHobbiesTalents: empty,
+    interestsHobbiesTalents: getVal(row, interestsIdx),
     volunteerOptions: empty,
     volunteerInvolvement: empty,
     emergencyContactName: empty,
@@ -168,6 +169,15 @@ export function mockSearchVolunteerByCode(code: string): Volunteer {
     }
   }
   throw new Error(`Volunteer not found with code: ${code}`);
+}
+
+export function mockGetVolunteersList(): Volunteer[] {
+  const codeIdx = findColIdx(volunteerData.headers, ['Code Number']);
+  if (codeIdx < 0) return [];
+
+  return volunteerData.rows
+    .filter((row) => getVal(row ?? [], codeIdx))
+    .map((row) => rowToVolunteer(volunteerData.headers, row ?? []));
 }
 
 export function mockGetCasesList(): Case[] {
