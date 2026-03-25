@@ -5,6 +5,7 @@ import {
   ServerOptions,
   build,
   defineConfig,
+  loadEnv,
   type Plugin,
 } from 'vite';
 import { existsSync, readFileSync } from 'fs';
@@ -54,10 +55,19 @@ if (existsSync(pfxPath)) {
   };
 }
 
-const clientServeConfig = () =>
+const clientServeConfig = (localApiPort: number) =>
   defineConfig({
     plugins: [react()],
-    server: devServerOptions,
+    server: {
+      ...devServerOptions,
+      proxy: {
+        '/api/rpc': {
+          target: `http://127.0.0.1:${localApiPort}`,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, ''),
+        },
+      },
+    },
     root: resolve(__dirname, clientRoot),
   });
 
@@ -211,7 +221,9 @@ const buildConfig = ({ mode }: { mode: string }) => {
 // https://vitejs.dev/config/
 export default async ({ command, mode }: { command: string; mode: string }) => {
   if (command === 'serve') {
-    return clientServeConfig();
+    const env = loadEnv(mode, process.cwd(), '');
+    const localApiPort = Number(env.MTV_LOCAL_API_PORT) || 3001;
+    return clientServeConfig(localApiPort);
   }
   if (command === 'build') {
     return buildConfig({ mode });
