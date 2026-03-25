@@ -137,6 +137,9 @@ export async function calculateDistanceAsync(
   origin: string,
   destination: string
 ): Promise<number | { error: string }> {
+  if (typeof UrlFetchApp !== 'undefined') {
+    return calculateDistance(origin, destination);
+  }
 
   const apiKey = getApiKey();
   if (!apiKey) {

@@ -66,7 +66,8 @@ async function googleRpc<T>(name: RpcHandlerName, args: unknown[]): Promise<T> {
 }
 
 /**
- * Call a server RPC by name. Args and return type match `rpcHandlers[name]` on the server.
+ * Call a server RPC by name. Args match `rpcHandlers[name]`; return type is the fulfilled
+ * result (`Awaited<ReturnType<…>>`), same as deserialized JSON from local RPC or GAS.
  */
 export async function invokeRpc<K extends RpcHandlerName>(
   name: K,
