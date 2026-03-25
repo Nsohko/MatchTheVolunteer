@@ -14,10 +14,13 @@ export const rpcHandlers = Object.fromEntries(
   Object.entries(handlerModule).filter(([, v]) => typeof v === 'function')
 ) as Pick<typeof handlerModule, RpcHandlerName>;
 
-/** Typed `invokeRpc` on the client: args and return mirror `rpcHandlers[name]`. */
+/** Typed `invokeRpc` on the client: args mirror `rpcHandlers[name]`. */
 export type RpcHandlerMap = typeof rpcHandlers;
 export type RpcArgs<K extends RpcHandlerName> = Parameters<RpcHandlerMap[K]>;
-export type RpcReturn<K extends RpcHandlerName> = ReturnType<RpcHandlerMap[K]>;
+/** Fulfilled return value (async handlers unwrap `Promise<…>` — matches JSON over the wire). */
+export type RpcReturn<K extends RpcHandlerName> = Awaited<
+  ReturnType<RpcHandlerMap[K]>
+>;
 
 export function isRpcHandlerName(name: string): name is RpcHandlerName {
   return (
