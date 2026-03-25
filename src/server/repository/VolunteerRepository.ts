@@ -13,7 +13,7 @@ import {
   getAllData,
   findHeaderRowIndex,
 } from '../utils/sheets';
-import { readVolunteerRowsFromLocalVolunteerXlsx } from './readVolunteerSheetFromLocalXlsx';
+import { readVolunteerRowsFromLocalVolunteerXlsx } from './mock/readVolunteerSheetFromLocalXlsx';
 
 function buildAvailabilities(row: VolunteerRow): Record<string, boolean> {
   return DAYS.reduce<Record<string, boolean>>((acc, day) => {
