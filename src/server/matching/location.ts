@@ -16,7 +16,7 @@ async function distanceBetween(
 
   if (
     distResult === null ||
-    (typeof distResult === 'object' && distResult.error)
+    (typeof distResult === 'object' && 'error' in distResult)
   ) {
     return null;
   }
