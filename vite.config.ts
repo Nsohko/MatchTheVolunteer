@@ -1,6 +1,12 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { resolve } from 'path';
-import { BuildOptions, ServerOptions, build, defineConfig } from 'vite';
+import {
+  BuildOptions,
+  ServerOptions,
+  build,
+  defineConfig,
+  type Plugin,
+} from 'vite';
 import { existsSync, readFileSync } from 'fs';
 import react from '@vitejs/plugin-react-swc';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
@@ -80,6 +86,38 @@ const clientBuildConfig = ({
 /** IIFE arg that creates exports on the real global - avoids `this` being undefined in GAS */
 const GAS_EXPORTS_ARG = `(function(){var g=typeof globalThis!=="undefined"?globalThis:typeof self!=="undefined"?self:this;g.__gasExports=g.__gasExports||{};return g.__gasExports;}())`;
 
+/** GAS bundle must not include `xlsx` / Node fs — swap local readers for throw-only stubs. */
+function stubLocalXlsxReadersForGasBundle(): Plugin {
+  const caseStub = resolve(
+    __dirname,
+    'src/server/repository/readCaseSheetFromLocalXlsx.stub.ts'
+  );
+  const volunteerStub = resolve(
+    __dirname,
+    'src/server/repository/readVolunteerSheetFromLocalXlsx.stub.ts'
+  );
+  return {
+    name: 'mtv-stub-local-xlsx-for-gas',
+    enforce: 'pre',
+    resolveId(id) {
+      const normalized = id.replace(/\\/g, '/');
+      if (
+        normalized.includes('readCaseSheetFromLocalXlsx') &&
+        !normalized.includes('readCaseSheetFromLocalXlsx.stub')
+      ) {
+        return caseStub;
+      }
+      if (
+        normalized.includes('readVolunteerSheetFromLocalXlsx') &&
+        !normalized.includes('readVolunteerSheetFromLocalXlsx.stub')
+      ) {
+        return volunteerStub;
+      }
+      return undefined;
+    },
+  };
+}
+
 const serverBuildConfig: BuildOptions = {
   emptyOutDir: true,
   minify: false, // needed to work with footer
@@ -141,6 +179,7 @@ const buildConfig = ({ mode }: { mode: string }) => {
   }
   return defineConfig({
     plugins: [
+      stubLocalXlsxReadersForGasBundle(),
       viteStaticCopy({
         targets,
       }),

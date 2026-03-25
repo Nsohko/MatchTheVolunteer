@@ -3,6 +3,7 @@ import type { Case } from "../../types/case";
 import { CASE_HEADER_MAP } from "../../types/case";
 import type { CaseRow } from "../../types/sheets";
 import { findHeaderRowIndex, getAllData, getSheet, openSpreadsheet } from "../utils/sheets";
+import { readCaseRowsFromLocalCaseXlsx } from "./readCaseSheetFromLocalXlsx";
 import { getValueByHeaderMatch, rowToObject } from "./utils";
 
 function caseRowToCase(rowIndex: number, row: CaseRow): Case {
@@ -89,23 +90,29 @@ function caseRowToCase(rowIndex: number, row: CaseRow): Case {
  * Converts raw sheet data to CaseRow[] and maps to Case with normalised field names.
  */
 export class CaseRepository {
-  spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet;
+  spreadsheet: GoogleAppsScript.Spreadsheet.Spreadsheet | null;
 
-  sheet: GoogleAppsScript.Spreadsheet.Sheet;
+  sheet: GoogleAppsScript.Spreadsheet.Sheet | null;
 
   data: CaseRow[];
 
   constructor() {
-    this.spreadsheet = openSpreadsheet(CONFIG.CASE_SHEET_URL);
-    this.sheet = getSheet(this.spreadsheet, CONFIG.CASE_SHEET_NAME);
-    const rawData = getAllData(this.sheet) as (string | number)[][];
-    const headerRowIdx = findHeaderRowIndex(rawData, ["SN"]);
-    const headers = (rawData[headerRowIdx] ?? []).map((h) => String(h ?? ""));
+    if (typeof SpreadsheetApp !== "undefined") {
+      this.spreadsheet = openSpreadsheet(CONFIG.CASE_SHEET_URL);
+      this.sheet = getSheet(this.spreadsheet, CONFIG.CASE_SHEET_NAME);
+      const rawData = getAllData(this.sheet) as (string | number)[][];
+      const headerRowIdx = findHeaderRowIndex(rawData, ["SN"]);
+      const headers = (rawData[headerRowIdx] ?? []).map((h) => String(h ?? ""));
 
-    this.data = rawData
-      .slice(headerRowIdx + 1)
-      .filter((row) => row && row.some((c) => c != null && c !== ""))
-      .map((row) => rowToObject<CaseRow>(headers, row));
+      this.data = rawData
+        .slice(headerRowIdx + 1)
+        .filter((row) => row && row.some((c) => c != null && c !== ""))
+        .map((row) => rowToObject<CaseRow>(headers, row));
+    } else {
+      this.spreadsheet = null;
+      this.sheet = null;
+      this.data = readCaseRowsFromLocalCaseXlsx();
+    }
   }
 
   findByRowIndex(rowIndex: number): Case | null {
