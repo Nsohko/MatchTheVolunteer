@@ -10,7 +10,7 @@
   "scripts": {
     "postinstall": "patch-package",
     "generate-types": "node scripts/generate-types-from-xlsx.js",
-    "dev": "concurrently -k \"vite\" \"tsx dev/local-api-server.ts\"",
+    "dev": "concurrently -k \"tsx dev/local-api-server.ts\" \"vite\"",
     "lint": "eslint .",
     "test:integration": "jest --forceExit test/local-development.test",
     "test:integration:extended": "cross-env IS_EXTENDED=true jest --forceExit test/local-development.test",

@@ -85,6 +85,9 @@ function caseRowToCase(rowIndex: number, row: CaseRow): Case {
   };
 }
 
+/** Populated only in the long-lived Node local API process; unused on GAS (fresh context per run). */
+let localCaseRepository: CaseRepository | null = null;
+
 /**
  * Repository for case data access.
  * Converts raw sheet data to CaseRow[] and maps to Case with normalised field names.
@@ -96,7 +99,21 @@ export class CaseRepository {
 
   data: CaseRow[];
 
-  constructor() {
+  /**
+   * Factory method to return a repository: on GAS, always a new instance (constructor loads the sheet).
+   * On local Node, reuses one instance per process so constructor (and spreadsheet/XLSX load) runs once.
+ */
+  static getCaseRepository(forceNew: boolean = false): CaseRepository {
+    if (typeof SpreadsheetApp !== 'undefined') {
+      return new CaseRepository();
+    }
+    if (!localCaseRepository || forceNew) {
+      localCaseRepository = new CaseRepository();
+    }
+    return localCaseRepository;
+  }
+
+  private constructor() {
     if (typeof SpreadsheetApp !== "undefined") {
       this.spreadsheet = openSpreadsheet(CONFIG.CASE_SHEET_URL);
       this.sheet = getSheet(this.spreadsheet, CONFIG.CASE_SHEET_NAME);
