@@ -1,6 +1,6 @@
 # Match The Volunteer
 
-Volunteer and Case lookup app built with React and Google Apps Script. Reads from two Google Spreadsheets (Volunteer Masterlist and Cases) and finds the closest volunteers to a case using the Google Maps Distance Matrix API.
+Volunteer and Case lookup app built with React and Google Apps Script. Reads from two Google Spreadsheets (Volunteer Masterlist and Cases) and finds the closest volunteers to a case using the Google Maps Routes API.
 
 ## Prerequisites
 
@@ -73,7 +73,7 @@ TODO: Make it able to connect to sheets and map during local dev
      - `CASE_SHEET_URL` – Case spreadsheet URL
      - `VOLUNTEER_SHEET_NAME` – e.g. `Volunteer Masterlist`
      - `CASE_SHEET_NAME` – e.g. `Cases`
-     - `GOOGLE_MAPS_API_KEY` – Your Google Maps API key
+     - `GOOGLE_MAPS_API_KEY` – API key with **Routes API** enabled on the Google Cloud project (billing on)
 
 3. **Deploy**
    From the GAS editor: **Deploy** → **New deployment** → **Web app**
