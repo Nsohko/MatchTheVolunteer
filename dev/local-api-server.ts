@@ -4,9 +4,13 @@
  * The entry `main()` must not return while the server runs: once it resolves, some
  * environments drain the loop and exit even though `listen` fired. We await shutdown
  * on SIGINT/SIGTERM instead.
+ *
+ * Binds the HTTP port first; repository warmup runs on the next event-loop turn so
+ * clients can connect before XLSX load finishes (handlers still use the same singletons).
  */
 /* eslint-disable import/no-extraneous-dependencies, no-console -- dev-only */
 import 'dotenv/config';
+import { initAllRepositories } from '../src/server/repository/utils.ts';
 
 const API_PORT = Number(process.env.MTV_LOCAL_API_PORT) || 3001;
 
@@ -43,6 +47,15 @@ async function main() {
 
   const server = app.listen(API_PORT, () => {
     console.log(`[mtv-local-api] http://127.0.0.1:${API_PORT} (POST /rpc)`);
+    setImmediate(() => {
+      try {
+        initAllRepositories(true);
+        console.log('[mtv-local-api] repositories warmed');
+      } catch (e) {
+        console.error('[mtv-local-api] repository init failed', e);
+        process.exit(1);
+      }
+    });
   });
 
   server.on('error', (err) => {

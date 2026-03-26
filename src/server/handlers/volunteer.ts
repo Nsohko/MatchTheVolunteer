@@ -1,10 +1,11 @@
-import { CaseRepository } from '../repository/CaseRepository';
-import { VolunteerRepository } from '../repository/VolunteerRepository';
+
 import { ClosestVolunteersResponse, Volunteer } from '../../types/volunteer';
 import { findClosestVolunteers } from '../matching/location';
+import { VolunteerRepository } from "../repository/VolunteerRepository";
+import { CaseRepository } from "../repository/CaseRepository";
 
 export function searchVolunteerByCode(code: string): Volunteer {
-  const repository = new VolunteerRepository();
+  const repository = VolunteerRepository.getVolunteerRepository();
   const volunteer = repository.findByCode(code);
   if (!volunteer) {
     throw new Error(`Volunteer not found with code: ${code}`);
@@ -22,14 +23,14 @@ export async function getClosestVolunteersForCase(
       throw new Error('Invalid caseRowId');
     }
 
-    const caseRepository = new CaseRepository();
+    const caseRepository = CaseRepository.getCaseRepository();
     const caseObj = caseRepository.findByRowIndex(rowIndex);
 
     if (!caseObj) {
       throw new Error(`Case row not found for id: ${caseRowId}`);
     }
 
-    const volunteerRepository = new VolunteerRepository();
+    const volunteerRepository = VolunteerRepository.getVolunteerRepository();
     const volunteers = volunteerRepository.getAll();
 
     const closestVolunteers = await findClosestVolunteers(

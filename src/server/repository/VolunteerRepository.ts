@@ -80,6 +80,9 @@ function volunteerRowToVolunteer(row: VolunteerRow): Volunteer {
   };
 }
 
+/** Populated only in the long-lived Node local API process; unused on GAS (fresh context per run). */
+let localVolunteerRepository: VolunteerRepository | null = null;
+
 /**
  * Repository for volunteer data access.
  * Converts raw sheet data to VolunteerRow[] and maps to Volunteer with normalised field names.
@@ -91,7 +94,21 @@ export class VolunteerRepository {
 
   data: VolunteerRow[];
 
-  constructor() {
+  /**
+   * Returns a repository: on GAS, always a new instance (constructor loads the sheet).
+   * On local Node, reuses one instance per process so constructor (and spreadsheet/XLSX load) runs once.
+   */
+  static getVolunteerRepository(forceNew: boolean = false): VolunteerRepository {
+    if (typeof SpreadsheetApp !== 'undefined') {
+      return new VolunteerRepository();
+    }
+    if (!localVolunteerRepository || forceNew) {
+      localVolunteerRepository = new VolunteerRepository();
+    }
+    return localVolunteerRepository;
+  }
+
+  private constructor() {
     if (typeof SpreadsheetApp !== 'undefined') {
       this.spreadsheet = openSpreadsheet(CONFIG.VOLUNTEER_SHEET_URL);
       this.sheet = getSheet(this.spreadsheet, CONFIG.VOLUNTEER_SHEET_NAME);
