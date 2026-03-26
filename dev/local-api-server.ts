@@ -47,10 +47,11 @@ async function main() {
 
   const server = app.listen(API_PORT, () => {
     console.log(`[mtv-local-api] http://127.0.0.1:${API_PORT} (POST /rpc)`);
+    console.log('[mtv-local-api] warming repositories, please wait...');
     setImmediate(() => {
       try {
         initAllRepositories(true);
-        console.log('[mtv-local-api] repositories warmed');
+        console.log('[mtv-local-api] repositories warmed, server ready!');
       } catch (e) {
         console.error('[mtv-local-api] repository init failed', e);
         process.exit(1);

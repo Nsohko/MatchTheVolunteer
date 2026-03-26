@@ -1,5 +1,8 @@
-export type MatrixJson = {
-    status?: string;
-    error_message?: string;
-    rows?: { elements?: { status?: string; distance?: { value: number } }[] }[];
-  };
+/** One element from `computeRouteMatrix` REST response (camelCase JSON). */
+export type RouteMatrixElementJson = {
+  originIndex?: number;
+  destinationIndex?: number;
+  status?: { code?: number; message?: string };
+  condition?: string;
+  distanceMeters?: number;
+};
